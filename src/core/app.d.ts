@@ -15,7 +15,7 @@ interface User extends Document {
 declare global {
   namespace Express {
     interface UserInRequest {
-      user?: Record<string, any>;
+      user: User;
     }
   }
 }
