@@ -3,7 +3,7 @@ import { check, validationResult } from 'express-validator';
 import statusCode from 'http-status-codes';
 import { UserInRequest } from '../core/app';
 import schema from '../schema/user.schema';
-import { comparePassword } from '../utils/hashPassword';
+import { comparePassword } from '../utils/password';
 
 const loginValidator = [
   check('password')
