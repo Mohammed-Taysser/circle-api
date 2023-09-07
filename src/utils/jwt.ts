@@ -11,6 +11,7 @@ async function generateToken(user: Partial<User>) {
       lastName: user.lastName,
       username: user.username,
       avatar: user.avatar,
+      role: user.role,
     },
     CONFIG.JWT_SECRET_KEY,
     {
@@ -19,7 +20,7 @@ async function generateToken(user: Partial<User>) {
   );
 }
 
-function verifyToken(token: string, options: VerifyOptions) {
+function verifyToken(token: string, options?: VerifyOptions) {
   return jwt.verify(token, CONFIG.JWT_SECRET_KEY, options);
 }
 
