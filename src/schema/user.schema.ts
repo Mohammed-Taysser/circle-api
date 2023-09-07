@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { hashPassword } from '../utils/hashPassword';
 import { User } from '../core/app';
+import { hashPassword } from '../utils/password';
 
 const userSchema = new mongoose.Schema(
   {
