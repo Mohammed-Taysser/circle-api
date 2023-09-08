@@ -10,6 +10,7 @@ import config from './core/config';
 import compression from './middleware/compression';
 import favicon from './middleware/favicon';
 import i18n from './middleware/i18n';
+import routeNotFound from './middleware/routeNotFound';
 import routes from './routes';
 
 // Express instance
@@ -78,6 +79,8 @@ mongoose
 
       // mount api routes
       app.use('/api/v1', routes);
+      // 404 route not found
+      app.use(routeNotFound);
     });
   })
   .catch((error: Error) => {
