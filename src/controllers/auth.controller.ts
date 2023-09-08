@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { UserInRequest } from '../core/app';
 import schema from '../schema/user.schema';
+import { UserInRequest } from '../types/app';
 import { generateToken } from '../utils/jwt';
 
 async function register(request: Request, response: Response) {
@@ -32,4 +32,11 @@ async function login(request: UserInRequest, response: Response) {
   });
 }
 
-export default { login, register };
+async function refreshToken(request: UserInRequest, response: Response) {
+  const { user } = request;
+
+  const token = await generateToken(user);
+  response.status(statusCode.OK).json({ token });
+}
+
+export default { login, register, refreshToken };
