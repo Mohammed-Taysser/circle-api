@@ -70,7 +70,7 @@ async function update(request: UserInRequest, response: Response) {
     });
 }
 
-async function deleteUser(request: UserInRequest, response: Response) {
+async function deleteGroup(request: UserInRequest, response: Response) {
   const { id } = request.params;
 
   await schema
@@ -97,10 +97,10 @@ async function search(request: Request, response: Response) {
 
   switch (request.query.sort) {
     case 'a-z':
-      sort = 'firstName';
+      sort = 'name';
       break;
     case 'z-a':
-      sort = '-firstName';
+      sort = '-name';
       break;
     case 'latest':
       sort = '-createdAt';
@@ -114,12 +114,7 @@ async function search(request: Request, response: Response) {
   }
 
   const queryFilter = {
-    $or: [
-      { username: { $regex: searchQuery, $options: 'i' } },
-      { email: { $regex: searchQuery, $options: 'i' } },
-      { firstName: { $regex: searchQuery, $options: 'i' } },
-      { lastName: { $regex: searchQuery, $options: 'i' } },
-    ],
+    $or: [{ name: { $regex: searchQuery, $options: 'i' } }],
   };
 
   const total = await schema.countDocuments(queryFilter);
@@ -137,4 +132,4 @@ async function search(request: Request, response: Response) {
     });
 }
 
-export default { all, view, create, delete: deleteUser, update, search };
+export default { all, view, create, delete: deleteGroup, update, search };
