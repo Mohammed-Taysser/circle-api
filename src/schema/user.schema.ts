@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { User } from '../core/app';
+import { User } from '../types/app';
 import { hashPassword } from '../utils/password';
 
 const userSchema = new mongoose.Schema(
@@ -15,8 +15,8 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'user'],
       required: [true, 'Please specify user role'],
     },
-    firstName: { type: String },
-    lastName: { type: String },
+    firstName: { type: String, required: [true, 'first name not provided!'] },
+    lastName: { type: String, required: [true, 'last name not provided!'] },
     avatar: {
       type: String,
       default:

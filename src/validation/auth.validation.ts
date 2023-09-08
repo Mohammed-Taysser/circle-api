@@ -78,6 +78,18 @@ const registerValidator = [
     .isStrongPassword()
     .withMessage('Please provide strong password!')
     .bail(),
+  check('firstName')
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage('First name can not be empty!')
+    .bail(),
+  check('lastName')
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage('Last name can not be empty!')
+    .bail(),
   check('email')
     .trim()
     .normalizeEmail()
