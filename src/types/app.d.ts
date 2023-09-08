@@ -1,12 +1,12 @@
 /// <reference types="express" />
 /// <reference types="mongoose" />
 
-import { Request } from 'express';
+import 'express';
 import { Document } from 'mongoose';
 
 interface User extends Document {
   username: string;
-  role: string;
+  role: 'admin' | 'user';
   firstName: string;
   lastName: string;
   avatar: string;
@@ -15,15 +15,16 @@ interface User extends Document {
 }
 
 declare module 'express' {
-  interface  UserInRequest extends Request {
+  interface UserInRequest extends Request {
     user: User;
   }
 }
 
-// interface UserInRequest extends Request {
-//   user?: User;
-// }
+interface Group extends Document {
+  name: string;
+  visibility: 'public' | 'private';
+  avatar: string;
+}
 
-// type UserInRequest = Request<{}, {}, { user: User; }>;
+export { Group, User, UserInRequest };
 
-export { User, UserInRequest };
