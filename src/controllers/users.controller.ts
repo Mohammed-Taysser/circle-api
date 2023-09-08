@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { UserInRequest } from '../core/app';
 import schema from '../schema/user.schema';
+import { UserInRequest } from '../types/app';
 import { calculatePagination } from '../utils/pagination';
 
 async function all(request: Request, response: Response) {
@@ -43,7 +43,7 @@ async function update(request: UserInRequest, response: Response) {
 
   const { role, ...body } = request.body;
 
-  if (request?.user.role === 'admin') {
+  if (request?.user?.role === 'admin') {
     body.role = role;
   }
 
