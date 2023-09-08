@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { UserInRequest } from '../core/app';
+import { UserInRequest } from '../types/app';
 import schema from '../schema/user.schema';
 
 async function ownerOrAdmin(

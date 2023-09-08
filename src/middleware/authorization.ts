@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { UserInRequest } from '../core/app';
+import { UserInRequest } from '../types/app';
 import { verifyToken } from '../utils/jwt';
 
 const authorization = async (
