@@ -1,11 +1,12 @@
 import express from 'express';
 import controller from '../controllers/auth.controller';
-import loginValidation from '../validation/login.validate';
-import registerValidation from '../validation/register.validate';
+import authorization from '../middleware/authorization';
+import validation from '../validation/auth.validation';
 
 const router = express.Router();
 
-router.post('/register', registerValidation, controller.register);
-router.post('/login', loginValidation, controller.login);
+router.post('/register', validation.register, controller.register);
+router.post('/login', validation.login, controller.login);
+router.post('/refresh-token', authorization, controller.refreshToken);
 
 export default router;
