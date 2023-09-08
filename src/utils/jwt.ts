@@ -1,6 +1,6 @@
 import jwt, { VerifyOptions } from 'jsonwebtoken';
-import { User } from '../core/app';
 import CONFIG from '../core/config';
+import { User } from '../types/app';
 
 async function generateToken(user: Partial<User>) {
   return jwt.sign(
