@@ -6,7 +6,8 @@ const schema = Joi.object({
     .valid(...['development', 'production', 'test', 'provision'])
     .required(),
   PORT: Joi.number().required(),
-  MONGO_URL: Joi.string().required(),
+  MONGO_URL_DEV: Joi.string().required(),
+  MONGO_URL_PROD: Joi.string().required(),
 
   JWT_SECRET_KEY: Joi.string().required(),
   JWT_REFRESH_KEY: Joi.string().required(),
@@ -43,7 +44,10 @@ const CONFIG = {
 
   server: {
     port: envVars.PORT,
-    mongoUrl: envVars.MONGO_URL,
+    mongoUrl:
+      envVars.NODE_ENV === 'development'
+        ? envVars.MONGO_URL_DEV
+        : envVars.MONGO_URL_PROD,
   },
 
   JWT_SECRET_KEY: envVars.JWT_SECRET_KEY,
