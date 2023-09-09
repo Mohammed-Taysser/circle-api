@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema(
       default:
         'https://res.cloudinary.com/mohammed-taysser/image/upload/v1654679434/paperCuts/authors/avatar-2_grpukn.png',
     },
+    cover: {
+			type: String,
+			default:
+				'https://res.cloudinary.com/mohammed-taysser/image/upload/v1657350049/lama/users/5437842_py0e8h.jpg',
+		},
     email: {
       type: String,
       required: [true, 'email not provided!'],
