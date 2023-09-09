@@ -10,8 +10,6 @@ async function generateToken(user: Partial<User>) {
       firstName: user.firstName,
       lastName: user.lastName,
       username: user.username,
-      avatar: user.avatar,
-      role: user.role,
     },
     CONFIG.JWT_SECRET_KEY,
     {
