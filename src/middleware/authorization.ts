@@ -1,7 +1,8 @@
 import { NextFunction, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { UserInRequest } from '../types/app';
+import { User, UserInRequest } from '../types/app';
 import { verifyToken } from '../utils/jwt';
+import schema from '../schema/user.schema';
 
 const authorization = async (
   request: UserInRequest,
@@ -12,9 +13,12 @@ const authorization = async (
 
   if (token?.startsWith('Bearer')) {
     try {
-      const user = verifyToken(token.split(' ')[1]);
+      const user = verifyToken(token.split(' ')[1]) as User;
 
-      request.user = user;
+      const userDB = await schema.findById(user?._id);
+
+      request.user = userDB;
+
       next();
     } catch (err) {
       response
