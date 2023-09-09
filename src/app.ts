@@ -12,6 +12,7 @@ import favicon from './middleware/favicon';
 import i18n from './middleware/i18n';
 import routeNotFound from './middleware/routeNotFound';
 import routes from './routes';
+import serverError from './middleware/serverError';
 
 // Express instance
 const app: Application = express();
@@ -81,6 +82,8 @@ mongoose
       app.use('/api/v1', routes);
       // 404 route not found
       app.use(routeNotFound);
+      // 500 errors
+      app.use(serverError);
     });
   })
   .catch((error: Error) => {
