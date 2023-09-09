@@ -2,23 +2,25 @@ import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import schema from '../schema/group.schema';
 import { UserInRequest } from '../types/app';
+import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
 
 async function all(request: Request, response: Response) {
   const pagination = calculatePagination(request);
 
-  const total = await schema.countDocuments();
+  try {
+    const total = await schema.countDocuments();
 
-  await schema
-    .find()
-    .skip(pagination.skip)
-    .limit(pagination.limit)
-    .then((groups) => {
-      response.status(statusCode.OK).json({ groups, total });
-    })
-    .catch((error) => {
-      response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
-    });
+    await schema
+      .find()
+      .skip(pagination.skip)
+      .limit(pagination.limit)
+      .then((groups) => {
+        response.status(statusCode.OK).json({ groups, total });
+      });
+  } catch (error) {
+    response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
+  }
 }
 
 async function view(request: Request, response: Response) {
@@ -56,17 +58,54 @@ async function create(request: Request, response: Response) {
 }
 
 async function update(request: UserInRequest, response: Response) {
+  const { files } = request;
   const { id } = request.params;
 
   await schema
-    .findByIdAndUpdate(id, request.body, {
-      new: true,
+    .findById(id)
+    .then(async (groupInstance) => {
+      if (groupInstance) {
+        try {
+          const body = { ...request.body };
+
+          if (files?.cover) {
+            await cloudinary.destroyer(groupInstance.cover);
+
+            const cover = await cloudinary.uploadCover(
+              files.cover[0].path,
+              'groups'
+            );
+            body.cover = cover.secure_url;
+          }
+
+          if (files?.avatar) {
+            await cloudinary.destroyer(groupInstance.avatar);
+
+            const avatar = await cloudinary.uploadAvatar(
+              files.avatar[0].path,
+              'groups'
+            );
+            body.avatar = avatar.secure_url;
+          }
+
+          const group = await schema.findByIdAndUpdate(id, body, {
+            new: true,
+          });
+
+          response.status(statusCode.OK).json({ group });
+        } catch (error) {
+          response.status(statusCode.BAD_REQUEST).json({ error });
+        }
+      } else {
+        response
+          .status(statusCode.BAD_REQUEST)
+          .json({ error: 'Group Not Exist' });
+      }
     })
-    .then((group) => {
-      response.status(statusCode.OK).json({ group });
-    })
-    .catch((error) => {
-      response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
+    .catch(() => {
+      response
+        .status(statusCode.BAD_REQUEST)
+        .json({ error: 'Group Not Exist' });
     });
 }
 

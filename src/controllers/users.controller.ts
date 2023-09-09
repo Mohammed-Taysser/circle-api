@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import schema from '../schema/user.schema';
 import { UserInRequest } from '../types/app';
+import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
 
 async function all(request: Request, response: Response) {
@@ -39,8 +40,8 @@ async function view(request: Request, response: Response) {
 }
 
 async function update(request: UserInRequest, response: Response) {
+  const { files } = request;
   const { id } = request.params;
-
   const { role, ...body } = request.body;
 
   if (request?.user?.role === 'admin') {
@@ -48,14 +49,49 @@ async function update(request: UserInRequest, response: Response) {
   }
 
   await schema
-    .findByIdAndUpdate(id, body, {
-      new: true,
+    .findById(id)
+    .then(async (userInstance) => {
+      if (userInstance) {
+        try {
+          const body = { ...request.body };
+
+          if (files?.cover) {
+            await cloudinary.destroyer(userInstance.cover);
+
+            const cover = await cloudinary.uploadCover(
+              files.cover[0].path,
+              'users'
+            );
+            body.cover = cover.secure_url;
+          }
+
+          if (files?.avatar) {
+            await cloudinary.destroyer(userInstance.avatar);
+
+            const avatar = await cloudinary.uploadAvatar(
+              files.avatar[0].path,
+              'users'
+            );
+            body.avatar = avatar.secure_url;
+          }
+
+          const user = await schema.findByIdAndUpdate(id, body, {
+            new: true,
+          });
+
+          response.status(statusCode.OK).json({ user });
+        } catch (error) {
+          console.log(error);
+          response.status(statusCode.BAD_REQUEST).json({ error });
+        }
+      } else {
+        response
+          .status(statusCode.BAD_REQUEST)
+          .json({ error: 'User Not Exist' });
+      }
     })
-    .then((user) => {
-      response.status(statusCode.OK).json({ user });
-    })
-    .catch((error) => {
-      response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
+    .catch(() => {
+      response.status(statusCode.BAD_REQUEST).json({ error: 'User Not Exist' });
     });
 }
 
