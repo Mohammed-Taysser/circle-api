@@ -4,6 +4,7 @@ import schema from '../schema/user.schema';
 const service = {
   all: () => schema.find(),
   getByEmail: (email: string) => schema.findOne({ email }),
+  getByUsername: (username: string) => schema.findOne({ username }),
   getById: (id: string) => schema.findById(id),
   save: (body: UserSaveBody) =>
     new schema(body).save().then((user) => user.toObject()),
