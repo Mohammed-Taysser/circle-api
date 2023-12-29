@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { SavedUserDocument } from 'types/user';
 import { hashPassword } from '../utils/password';
 
 const userSchema = new mongoose.Schema(
@@ -31,7 +32,10 @@ const userSchema = new mongoose.Schema(
       required: [true, 'email not provided!'],
       unique: [true, 'email already exists!'],
     },
-    password: { type: String, required: [true, 'password not provided!'] , select:false},
+    password: {
+      type: String,
+      required: [true, 'password not provided!'],
+    },
     badges: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -50,4 +54,4 @@ userSchema.pre('save', async function () {
   }
 });
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model<SavedUserDocument>('User', userSchema);
