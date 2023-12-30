@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { IRequest } from 'types/user';
 import service from '../services/user.service';
 import { generateToken } from '../utils/jwt';
+import { IRequest } from 'types/app';
 
 async function register(request: Request, response: Response) {
   try {

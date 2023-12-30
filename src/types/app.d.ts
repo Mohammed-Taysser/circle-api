@@ -1,3 +1,6 @@
+import { Request } from 'express';
+import { User } from './user';
+
 export interface Configuration {
   env: string;
   server: {
@@ -15,6 +18,10 @@ export interface Configuration {
     apiKey: string;
     apiSecret: string;
   };
+}
+
+export interface IRequest extends Request {
+  user: User;
 }
 
 // JWT

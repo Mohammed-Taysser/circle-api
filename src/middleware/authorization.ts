@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import statusCode from 'http-status-codes';
+import { IRequest } from 'types/app';
 import service from '../services/user.service';
 import { verifyToken } from '../utils/jwt';
-import { IRequest } from 'types/user';
 
 const authorization = async (
   req: Request,

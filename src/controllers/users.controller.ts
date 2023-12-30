@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
+import { IRequest } from 'types/app';
 import service from '../services/user.service';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
-import { IRequest } from 'types/user';
 
 async function all(request: Request, response: Response) {
   const pagination = calculatePagination(request);

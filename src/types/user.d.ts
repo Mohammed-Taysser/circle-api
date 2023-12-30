@@ -20,10 +20,6 @@ export interface UserSaveBody {
   password: string;
 }
 
-export interface IRequest extends Request {
-  user: User;
-}
-
 export type UserUpdateBody = Partial<User>;
 
 export type SavedUserDocument = mongoose.Document & User;
