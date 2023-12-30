@@ -9,6 +9,12 @@ export interface Configuration {
     refresh: string;
     life: string;
   };
+
+  cloudinary: {
+    cloudName: string;
+    apiKey: string;
+    apiSecret: string;
+  };
 }
 
 // JWT
@@ -19,3 +25,6 @@ interface JwtTokenPayload {
   lastName: string;
   username: string;
 }
+
+// Cloudinary
+type CloudinaryUploaderType = 'users' | 'groups' | 'badges';
