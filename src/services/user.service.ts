@@ -27,10 +27,10 @@ function getById(id: string) {
 }
 
 function save(body: UserSaveBody) {
-  return new schema(body).save().then((user) => user.toObject());
+  return new schema(body).save().then((item) => item.toObject());
 }
 
-function deleteUser(id: string) {
+function deleteItem(id: string) {
   return schema.findByIdAndDelete(id).populate('badges');
 }
 
@@ -45,7 +45,7 @@ const service = {
   getByUsername,
   getById,
   save,
-  delete: deleteUser,
+  delete: deleteItem,
   update,
   filter,
 };

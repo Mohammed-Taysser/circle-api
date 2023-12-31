@@ -16,8 +16,15 @@ export interface User {
 }
 
 export interface UserSaveBody {
+  username: string;
+  role: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  cover: string;
   email: string;
   password: string;
+  badges: Badge[];
 }
 
 export type UserUpdateBody = Partial<User>;

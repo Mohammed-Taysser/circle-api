@@ -10,8 +10,11 @@ export interface Badge {
 }
 
 export interface BadgeSaveBody {
-  email: string;
-  password: string;
+  label: string;
+  body: string;
+  picture: string;
+  earnedAt: Date;
+  updatedAt: Date;
 }
 export type BadgeUpdateBody = Partial<Badge>;
 

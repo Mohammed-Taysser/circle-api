@@ -24,5 +24,10 @@ const userUpload = multerUtils.fields([
   { name: 'cover', maxCount: 1 },
 ]);
 
+const groupUpload = multerUtils.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'cover', maxCount: 1 },
+]);
+
 export default multerUtils;
-export { userUpload };
+export { userUpload, groupUpload };

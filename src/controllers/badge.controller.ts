@@ -39,7 +39,6 @@ async function view(request: Request, response: Response) {
     });
 }
 
-// TODO: get users that has the same badges for each badge in response, no need for endpoint
 async function viewUserBadges(request: Request, response: Response) {
   const { id } = request.params;
 
@@ -117,14 +116,14 @@ async function update(request: Request, response: Response) {
     });
 }
 
-async function deleteBadge(request: Request, response: Response) {
+async function deleteItem(request: Request, response: Response) {
   const { id } = request.params;
 
   await service
     .delete(id)
-    .then(async(badge) => {
+    .then(async (badge) => {
       if (badge) {
-        response.status(statusCode.OK).json(badge);
+        response.status(statusCode.OK).json({ badge });
       } else {
         response
           .status(statusCode.BAD_REQUEST)
@@ -155,7 +154,6 @@ async function search(request: Request, response: Response) {
     case 'oldest':
       sort = 'createdAt';
       break;
-
   }
 
   const queryFilter = {
@@ -181,7 +179,7 @@ export default {
   all,
   view,
   create,
-  delete: deleteBadge,
+  delete: deleteItem,
   viewUserBadges,
   update,
   search,

@@ -18,7 +18,7 @@ function save(body: SubscriptionSaveBody) {
   return new schema(body).save().then((item) => item.toObject());
 }
 
-function deleteSubscription(id: string) {
+function deleteItem(id: string) {
   return schema.findByIdAndDelete(id);
 }
 
@@ -27,7 +27,7 @@ const service = {
   countDocuments,
   getByEmail,
   save,
-  delete: deleteSubscription,
+  delete: deleteItem,
 };
 
 export default service;

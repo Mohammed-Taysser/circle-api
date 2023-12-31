@@ -15,10 +15,10 @@ function getById(id: string) {
 }
 
 function save(body: BadgeSaveBody) {
-  return new schema(body).save().then((badge) => badge.toObject());
+  return new schema(body).save().then((item) => item.toObject());
 }
 
-function deleteBadge(id: string) {
+function deleteItem(id: string) {
   return schema.findByIdAndDelete(id);
 }
 
@@ -35,7 +35,7 @@ const service = {
   countDocuments,
   getById,
   save,
-  delete: deleteBadge,
+  delete: deleteItem,
   update,
   filter,
 };

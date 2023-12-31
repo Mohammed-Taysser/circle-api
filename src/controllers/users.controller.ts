@@ -100,7 +100,7 @@ async function update(req: Request, response: Response) {
     });
 }
 
-async function deleteUser(req: Request, response: Response) {
+async function deleteItem(req: Request, response: Response) {
   const request = req as IRequest;
 
   const { id } = request.params;
@@ -110,7 +110,7 @@ async function deleteUser(req: Request, response: Response) {
 
     .then((user) => {
       if (user) {
-        response.status(statusCode.OK).json(user);
+        response.status(statusCode.OK).json({ user });
       } else {
         response
           .status(statusCode.BAD_REQUEST)
@@ -163,9 +163,9 @@ async function search(request: Request, response: Response) {
     .then((results) => {
       response.status(statusCode.OK).json({ users: results, total });
     })
-    .catch((error) => {      
+    .catch((error) => {
       response.status(statusCode.BAD_REQUEST).json({ error });
     });
 }
 
-export default { all, view, delete: deleteUser, update, search };
+export default { all, view, delete: deleteItem, update, search };
