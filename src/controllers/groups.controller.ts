@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import service from '../services/group.service';
+import service from '../services/group.services';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
 import { IRequest } from 'types/app';
