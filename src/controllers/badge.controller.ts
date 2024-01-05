@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import service from '../services/badge.service';
+import service from '../services/badge.services';
 import userSchema from '../schema/user.schema';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
