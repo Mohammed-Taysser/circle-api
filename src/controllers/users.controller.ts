@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import { IRequest } from 'types/app';
-import service from '../services/user.service';
+import service from '../services/user.services';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
 

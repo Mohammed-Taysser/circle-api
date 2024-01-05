@@ -7,23 +7,35 @@ function countDocuments(filters?: FilterQuery<User>) {
 }
 
 function all() {
-  return schema.find().populate('badges');
+  return schema.find().populate('badges.badge').populate('bookmarks.bookmark');
 }
 
 function filter(filters: FilterQuery<User>) {
-  return schema.find(filters).populate('badges');
+  return schema
+    .find(filters)
+    .populate('badges.badge')
+    .populate('bookmarks.bookmark');
 }
 
 function getByEmail(email: string) {
-  return schema.findOne({ email }).populate('badges');
+  return schema
+    .findOne({ email })
+    .populate('badges.badge')
+    .populate('bookmarks.bookmark');
 }
 
 function getByUsername(username: string) {
-  return schema.findOne({ username }).populate('badges');
+  return schema
+    .findOne({ username })
+    .populate('badges.badge')
+    .populate('bookmarks.bookmark');
 }
 
 function getById(id: string) {
-  return schema.findById(id).populate('badges');
+  return schema
+    .findById(id)
+    .populate('badges.badge')
+    .populate('bookmarks.bookmark');
 }
 
 function save(body: UserSaveBody) {
@@ -31,11 +43,17 @@ function save(body: UserSaveBody) {
 }
 
 function deleteItem(id: string) {
-  return schema.findByIdAndDelete(id).populate('badges');
+  return schema
+    .findByIdAndDelete(id)
+    .populate('badges.badge')
+    .populate('bookmarks.bookmark');
 }
 
 function update(id: string, body: UserUpdateBody) {
-  return schema.findByIdAndUpdate(id, body, { new: true }).populate('badges');
+  return schema
+    .findByIdAndUpdate(id, body, { new: true })
+    .populate('badges.badge')
+    .populate('bookmarks.bookmark');
 }
 
 const service = {
