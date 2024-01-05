@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import service from '../services/subscription.service';
+import service from '../services/subscription.services';
 import { calculatePagination } from '../utils/pagination';
 
 async function all(request: Request, response: Response) {
