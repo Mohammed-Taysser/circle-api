@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { SavedUserDocument } from 'types/user';
+import { UserDocument } from 'types/user';
 import { hashPassword } from '../utils/password';
 
 const userSchema = new mongoose.Schema(
@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'user',
       enum: ['admin', 'user'],
-      required: [true, 'Please specify user role'],
     },
     firstName: { type: String, required: [true, 'first name not provided!'] },
     lastName: { type: String, required: [true, 'last name not provided!'] },
@@ -29,8 +28,8 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, 'email not provided!'],
-      unique: [true, 'email already exists!'],
+      required: [true, 'Email not provided!'],
+      unique: [true, 'Email already exists!'],
     },
     password: {
       type: String,
@@ -38,13 +37,22 @@ const userSchema = new mongoose.Schema(
     },
     badges: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Badge',
+        badge: { type: mongoose.Schema.Types.ObjectId, ref: 'Badge' },
+        earnAt: { type: Date, default: new Date() },
+      },
+    ],
+    bookmarks: [
+      {
+        post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+        saveAt: { type: Date, default: new Date() },
       },
     ],
   },
   {
-    timestamps: true,
+    timestamps: {
+      createdAt: 'joinAt',
+      updatedAt: 'updatedAt',
+    },
   }
 );
 
@@ -54,4 +62,4 @@ userSchema.pre('save', async function () {
   }
 });
 
-export default mongoose.model<SavedUserDocument>('User', userSchema);
+export default mongoose.model<UserDocument>('User', userSchema);

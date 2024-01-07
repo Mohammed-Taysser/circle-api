@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import mongoose, { FilterQuery } from 'mongoose';
 import { User, UserSaveBody, UserUpdateBody } from 'types/user';
 import schema from '../schema/user.schema';
 
@@ -7,35 +7,23 @@ function countDocuments(filters?: FilterQuery<User>) {
 }
 
 function all() {
-  return schema.find().populate('badges.badge').populate('bookmarks.bookmark');
+  return populate(schema.find());
 }
 
 function filter(filters: FilterQuery<User>) {
-  return schema
-    .find(filters)
-    .populate('badges.badge')
-    .populate('bookmarks.bookmark');
+  return populate(schema.find(filters));
 }
 
 function getByEmail(email: string) {
-  return schema
-    .findOne({ email })
-    .populate('badges.badge')
-    .populate('bookmarks.bookmark');
+  return populate(schema.findOne({ email }));
 }
 
 function getByUsername(username: string) {
-  return schema
-    .findOne({ username })
-    .populate('badges.badge')
-    .populate('bookmarks.bookmark');
+  return populate(schema.findOne({ username }));
 }
 
 function getById(id: string) {
-  return schema
-    .findById(id)
-    .populate('badges.badge')
-    .populate('bookmarks.bookmark');
+  return populate(schema.findById(id));
 }
 
 function save(body: UserSaveBody) {
@@ -43,17 +31,15 @@ function save(body: UserSaveBody) {
 }
 
 function deleteItem(id: string) {
-  return schema
-    .findByIdAndDelete(id)
-    .populate('badges.badge')
-    .populate('bookmarks.bookmark');
+  return populate(schema.findByIdAndDelete(id));
 }
 
 function update(id: string, body: UserUpdateBody) {
-  return schema
-    .findByIdAndUpdate(id, body, { new: true })
-    .populate('badges.badge')
-    .populate('bookmarks.bookmark');
+  return populate(schema.findByIdAndUpdate(id, body, { new: true }));
+}
+
+function populate(query: mongoose.Query<any, User>) {
+  return query.populate('badges.badge').populate('bookmarks.post');
 }
 
 const service = {
