@@ -1,12 +1,20 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import { IRequest } from 'types/app';
-import service from '../services/user.services';
+import schema from '../schema/user.schema';
 import { generateToken } from '../utils/jwt';
 
 async function register(request: Request, response: Response) {
   try {
-    const user = await service.save(request.body);
+    const body = {
+      email: request.body.email,
+      password: request.body.password,
+      firstName: request.body.firstName,
+      lastName: request.body.lastName,
+      username: request.body.username,
+    };
+
+    const user = await new schema(body).save();
 
     const token = await generateToken(user);
 

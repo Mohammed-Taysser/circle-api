@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryUploaderType } from 'types/app';
+import { CloudinaryUploaderType, MFile } from 'types/app';
 import CONFIG from '../core/config';
 
 cloudinary.config({
@@ -8,21 +8,22 @@ cloudinary.config({
   api_secret: CONFIG.cloudinary.apiSecret,
 });
 
-function destroyer(path: string) {
-  const ids = path.split('/');
-  const id = ids
-    .slice(ids.length - 4)
-    .join('/')
-    .split('.')[0];
+function extractPathFromCloudinaryURL(url: string): string | null {
+  const match = RegExp(/(?:\/v\d+\/)(.+)$/).exec(url);
 
-  // convert
-  // https://res.cloudinary.com/username/image/upload/v-id/circle/users/avatar/avatar-2.png
-  // to
-  // "circle/users/avatar/avatar-2.png"
-  // to
-  // "circle/users/avatar/avatar-2"
+  if (match?.[1]) {
+    return match[1].replace(/\.\w+$/, '');
+  }
 
-  return cloudinary.uploader.destroy(id);
+  return null;
+}
+
+async function destroyer(url: string) {
+  const id = extractPathFromCloudinaryURL(url);
+
+  if (id) {
+    cloudinary.uploader.destroy(id);
+  }
 }
 
 function uploadAvatar(file: string, type: CloudinaryUploaderType) {
@@ -37,4 +38,35 @@ function uploadCover(file: string, type: CloudinaryUploaderType) {
   });
 }
 
-export default { uploadAvatar, uploadCover, destroyer };
+const uploadUserAvatar = async (avatar: MFile[], oldAvatar: string) => {
+  if (oldAvatar) {
+    await destroyer(oldAvatar);
+  }
+
+  const uploadedAvatar = await cloudinary.uploader.upload(avatar[0].path, {
+    folder: `circle/users/avatar`,
+    resource_type: 'image',
+  });
+
+  return uploadedAvatar.secure_url;
+};
+
+const uploadUserCover = async (cover: MFile[], oldCover: string) => {
+  if (oldCover) {
+    await destroyer(oldCover);
+  }
+
+  const uploadedCover = await cloudinary.uploader.upload(cover[0].path, {
+    folder: `circle/users/cover`,
+    resource_type: 'image',
+  });
+
+  return uploadedCover.secure_url;
+};
+
+const users = {
+  uploadCover: uploadUserCover,
+  uploadAvatar: uploadUserAvatar,
+};
+
+export default { uploadAvatar, uploadCover, destroyer, users };

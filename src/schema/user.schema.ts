@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { UserDocument } from 'types/user';
+import { IUser } from 'types/user';
 import { hashPassword } from '../utils/password';
 
 const userSchema = new mongoose.Schema(
@@ -62,4 +62,4 @@ userSchema.pre('save', async function () {
   }
 });
 
-export default mongoose.model<UserDocument>('User', userSchema);
+export default mongoose.model<IUser>('User', userSchema);

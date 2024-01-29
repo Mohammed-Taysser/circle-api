@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import statusCode from 'http-status-codes';
 import { IRequest } from 'types/app';
-import service from '../services/user.services';
+import schema from '../schema/user.schema';
 import { comparePassword } from '../utils/password';
 
 const login = [
@@ -41,7 +41,7 @@ const login = [
 
     const { email, password } = request.body;
 
-    const user = await service.getByEmail(email);
+    const user = await schema.findOne({ email });
 
     if (!user) {
       return response.status(statusCode.BAD_REQUEST).json({
@@ -102,8 +102,8 @@ const register = [
     .withMessage('Invalid email address!')
     .bail()
     .custom(async (email) => {
-      await service
-        .getByEmail(email)
+      await schema
+        .findOne({ email })
         .then((user) => {
           if (user) {
             return Promise.reject('Email already in use');
@@ -127,8 +127,8 @@ const register = [
     .withMessage('Please provide username!')
     .bail()
     .custom(async (username) => {
-      await service
-        .getByUsername(username)
+      await schema
+        .findOne({ username })
         .then((user) => {
           if (user) {
             return Promise.reject('Username already in use');
@@ -162,8 +162,8 @@ const forgotPassword = [
     .withMessage('Invalid email address!')
     .bail()
     .custom(async (email) => {
-      await service
-        .getByEmail(email)
+      await schema
+        .findOne({ email })
         .then((user) => {
           if (!user) {
             return Promise.reject('Email not exist');
@@ -188,8 +188,8 @@ const resetPassword = [
     .withMessage('Invalid email address!')
     .bail()
     .custom(async (email) => {
-      await service
-        .getByEmail(email)
+      await schema
+        .findOne({ email })
         .then((user) => {
           if (!user) {
             return Promise.reject('Email not exist');

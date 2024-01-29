@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import { IRequest } from 'types/app';
-import service from '../services/user.services';
+import schema from '../schema/user.schema';
 import { verifyToken } from '../utils/jwt';
 
 const authorization = async (
@@ -9,17 +9,17 @@ const authorization = async (
   response: Response,
   next: NextFunction
 ) => {
-  const request = req as IRequest
+  const request = req as IRequest;
   const token = request.headers['authorization'];
 
   if (token?.startsWith('Bearer')) {
     try {
       const user = verifyToken(token.split(' ')[1]);
 
-      const userDB = await service.getById(String(user._id));
+      const userDB = await schema.findById(String(user._id));
 
       if (userDB) {
-        request.user = userDB
+        request.user = userDB;
       } else {
         response
           .status(statusCode.FORBIDDEN)

@@ -35,3 +35,4 @@ interface JwtTokenPayload {
 
 // Cloudinary
 type CloudinaryUploaderType = 'users' | 'groups' | 'badges';
+type MFile = Express.Multer.File;

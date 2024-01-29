@@ -15,6 +15,13 @@ const multerUtils = multer({
       callback(new Error('Only .png, .jpg and .jpeg format allowed!'));
       return;
     }
+
+    // 5 MB
+    if (file.size > 5 * 1024 * 1024) {
+      callback(new Error('File size is too large!'));
+      return;
+    }
+
     callback(null, true);
   },
 });

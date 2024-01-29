@@ -1,34 +1,37 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import { IRequest } from 'types/app';
-import service from '../services/user.services';
+import schema from '../schema/user.schema';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
+import { User } from 'types/user';
 
-async function all(request: Request, response: Response) {
+async function allUsers(request: Request, response: Response) {
   const pagination = calculatePagination(request);
 
-  const total = await service.countDocuments();
+  const total = await schema.countDocuments();
 
-  await service
-    .all()
+  await schema
+    .find()
     .skip(pagination.skip)
     .limit(pagination.limit)
-
-    .then((results) => {
-      response.status(statusCode.OK).json({ users: results, total });
+    .populate('badges.badge')
+    .populate('bookmarks.post')
+    .then((users) => {
+      response.status(statusCode.OK).json({ users, total });
     })
     .catch((error) => {
       response.status(statusCode.BAD_REQUEST).json({ error });
     });
 }
 
-async function view(request: Request, response: Response) {
+async function getUser(request: Request, response: Response) {
   const { id } = request.params;
 
-  await service
-    .getById(id)
-
+  await schema
+    .findById(id)
+    .populate('badges.badge')
+    .populate('bookmarks.post')
     .then((user) => {
       if (user) {
         response.status(statusCode.OK).json({ user });
@@ -41,52 +44,52 @@ async function view(request: Request, response: Response) {
     });
 }
 
-async function update(req: Request, response: Response) {
+async function updateUser(req: Request, response: Response) {
   const request = req as IRequest;
 
   const files = request.files as Record<string, Express.Multer.File[]>;
 
   const { id } = request.params;
 
-  const { role, ...body } = request.body;
-
-  if (request.user.role === 'admin') {
-    body.role = role;
-  }
-
-  await service
-    .getById(id)
-
+  await schema
+    .findById(id)
+    .populate('badges.badge')
+    .populate('bookmarks.post')
     .then(async (userInstance) => {
       if (userInstance) {
         try {
-          const body = { ...request.body };
+          const body:Partial<User> = {
+            role: request.body?.role,
+            firstName: request.body?.firstName,
+            lastName: request.body?.lastName,
+            avatar: request.body?.avatar,
+            cover: request.body?.cover,
+            email: request.body?.email,
+            password: request.body?.password,
+            username: request.body?.username,
+          };
 
           if (files?.cover) {
-            await cloudinary.destroyer(userInstance.cover);
-
-            const cover = await cloudinary.uploadCover(
-              files.cover[0].path,
-              'users'
+            body.cover = await cloudinary.users.uploadCover(
+              files.cover,
+              userInstance.cover
             );
-            body.cover = cover.secure_url;
           }
 
           if (files?.avatar) {
-            await cloudinary.destroyer(userInstance.avatar);
-
-            const avatar = await cloudinary.uploadAvatar(
-              files.avatar[0].path,
-              'users'
+            body.avatar = await cloudinary.users.uploadAvatar(
+              files.avatar,
+              userInstance.avatar
             );
-            body.avatar = avatar.secure_url;
           }
 
-          const user = await service.update(id, body);
+          const user = await schema
+            .findByIdAndUpdate(id, body, { new: true })
+            .populate('badges.badge')
+            .populate('bookmarks.post');
 
           response.status(statusCode.OK).json({ user });
         } catch (error) {
-          console.log(error);
           response.status(statusCode.BAD_REQUEST).json({ error });
         }
       } else {
@@ -100,14 +103,15 @@ async function update(req: Request, response: Response) {
     });
 }
 
-async function deleteItem(req: Request, response: Response) {
+async function deleteUser(req: Request, response: Response) {
   const request = req as IRequest;
 
   const { id } = request.params;
 
-  await service
-    .delete(id)
-
+  await schema
+    .findByIdAndDelete(id)
+    .populate('badges.badge')
+    .populate('bookmarks.post')
     .then((user) => {
       if (user) {
         response.status(statusCode.OK).json({ user });
@@ -152,20 +156,27 @@ async function search(request: Request, response: Response) {
     ],
   };
 
-  const total = await service.countDocuments(queryFilter);
+  const total = await schema.countDocuments(queryFilter);
 
-  await service
-    .filter(queryFilter)
+  await schema
+    .find(queryFilter)
     .skip(pagination.skip)
     .limit(pagination.limit)
     .sort(sort)
-
-    .then((results) => {
-      response.status(statusCode.OK).json({ users: results, total });
+    .populate('badges.badge')
+    .populate('bookmarks.post')
+    .then((users) => {
+      response.status(statusCode.OK).json({ users, total });
     })
     .catch((error) => {
       response.status(statusCode.BAD_REQUEST).json({ error });
     });
 }
 
-export default { all, view, delete: deleteItem, update, search };
+export default {
+   allUsers,
+   getUser,
+   deleteUser,
+   updateUser,
+  search,
+};
