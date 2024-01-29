@@ -1,17 +1,18 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import service from '../services/badge.services';
+import schema from '../schema/badge.schema';
 import userSchema from '../schema/user.schema';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
+import { Badge } from 'types/badge';
 
-async function all(request: Request, response: Response) {
+async function allBadges(request: Request, response: Response) {
   const pagination = calculatePagination(request);
 
-  const total = await service.countDocuments();
+  const total = await schema.countDocuments();
 
-  await service
-    .all()
+  await schema
+    .find()
     .skip(pagination.skip)
     .limit(pagination.limit)
     .then((badges) => {
@@ -22,11 +23,11 @@ async function all(request: Request, response: Response) {
     });
 }
 
-async function view(request: Request, response: Response) {
+async function getBadge(request: Request, response: Response) {
   const { id } = request.params;
 
-  await service
-    .getById(id)
+  await schema
+    .findById(id)
     .then((badge) => {
       if (badge) {
         response.status(statusCode.OK).json({ badge });
@@ -39,7 +40,7 @@ async function view(request: Request, response: Response) {
     });
 }
 
-async function viewUserBadges(request: Request, response: Response) {
+async function getUserBadges(request: Request, response: Response) {
   const { id } = request.params;
 
   await userSchema
@@ -57,16 +58,21 @@ async function viewUserBadges(request: Request, response: Response) {
     });
 }
 
-async function create(request: Request, response: Response) {
-  const body = { ...request.body };
+async function createBadge(request: Request, response: Response) {
+  const { file } = request;
 
   try {
-    const picture = await cloudinary.uploadAvatar(body.picture.path, 'badges');
+    const body: Partial<Badge> = {
+      label: request.body.label,
+      body: request.body.body,
+    };
 
-    body.picture = picture.secure_url;
+    if (file) {
+      body.picture = await cloudinary.badges.uploadPicture(file);
+    }
 
-    await service
-      .save(body)
+    await new schema(body)
+      .save()
       .then((badge) => {
         response.status(statusCode.CREATED).json({ badge });
       })
@@ -78,27 +84,28 @@ async function create(request: Request, response: Response) {
   }
 }
 
-async function update(request: Request, response: Response) {
+async function updateBadge(request: Request, response: Response) {
   const { file } = request;
   const { id } = request.params;
 
-  await service
-    .getById(id)
+  await schema
+    .findById(id)
     .then(async (badgeInstance) => {
       if (badgeInstance) {
         try {
-          const body = { ...request.body };
+          const body: Partial<Badge> = {
+            label: request.body.label,
+            body: request.body.body,
+          };
 
           if (file) {
-            if (badgeInstance.picture) {
-              await cloudinary.destroyer(badgeInstance.picture);
-            }
-
-            const picture = await cloudinary.uploadAvatar(file.path, 'badges');
-            body.picture = picture.secure_url;
+            body.picture = await cloudinary.badges.uploadPicture(
+              file,
+              badgeInstance.picture
+            );
           }
 
-          const badge = await service.update(id, body);
+          const badge = await schema.findByIdAndUpdate(id, body);
 
           response.status(statusCode.OK).json({ badge });
         } catch (error) {
@@ -116,11 +123,11 @@ async function update(request: Request, response: Response) {
     });
 }
 
-async function deleteItem(request: Request, response: Response) {
+async function deleteBadge(request: Request, response: Response) {
   const { id } = request.params;
 
-  await service
-    .delete(id)
+  await schema
+    .findByIdAndDelete(id)
     .then(async (badge) => {
       if (badge) {
         response.status(statusCode.OK).json({ badge });
@@ -160,10 +167,10 @@ async function search(request: Request, response: Response) {
     $or: [{ label: { $regex: searchQuery, $options: 'i' } }],
   };
 
-  const total = await service.countDocuments(queryFilter);
+  const total = await schema.countDocuments(queryFilter);
 
-  await service
-    .filter(queryFilter)
+  await schema
+    .find(queryFilter)
     .skip(pagination.skip)
     .limit(pagination.limit)
     .sort(sort)
@@ -176,11 +183,11 @@ async function search(request: Request, response: Response) {
 }
 
 export default {
-  all,
-  view,
-  create,
-  delete: deleteItem,
-  viewUserBadges,
-  update,
+  allBadges,
+  getBadge,
+  createBadge,
+  deleteBadge,
+  getUserBadges,
+  updateBadge,
   search,
 };

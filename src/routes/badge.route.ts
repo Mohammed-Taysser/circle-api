@@ -6,22 +6,22 @@ import badgeValidation from '../validation/badge.validation';
 
 const router = express.Router();
 
-router.get('/', controller.all);
+router.get('/', controller.allBadges);
 router.post(
   '/',
   authorization,
   multer.single('picture'),
   badgeValidation.create,
-  controller.create
+  controller.createBadge
 );
 router.get('/search', controller.search);
-router.get('/:id', controller.view);
+router.get('/:id', controller.getBadge);
 router.patch(
   '/:id',
   authorization,
   multer.single('picture'),
-  controller.update
+  controller.updateBadge
 );
-router.delete('/:id', authorization, controller.delete);
+router.delete('/:id', authorization, controller.deleteBadge);
 
 export default router;

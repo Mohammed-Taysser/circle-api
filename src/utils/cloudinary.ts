@@ -64,9 +64,28 @@ const uploadUserCover = async (cover: MFile[], oldCover: string) => {
   return uploadedCover.secure_url;
 };
 
-const users = {
-  uploadCover: uploadUserCover,
-  uploadAvatar: uploadUserAvatar,
+const uploadBadgePicture = async (picture: MFile, oldPicture?: string) => {
+  if (oldPicture) {
+    await destroyer(oldPicture);
+  }
+
+  const uploadedPicture = await cloudinary.uploader.upload(picture.path, {
+    folder: `circle/badges/pictures`,
+    resource_type: 'image',
+  });
+
+  return uploadedPicture.secure_url;
 };
 
-export default { uploadAvatar, uploadCover, destroyer, users };
+export default {
+  uploadAvatar,
+  uploadCover,
+  destroyer,
+  users: {
+    uploadCover: uploadUserCover,
+    uploadAvatar: uploadUserAvatar,
+  },
+  badges: {
+    uploadPicture: uploadBadgePicture,
+  },
+};

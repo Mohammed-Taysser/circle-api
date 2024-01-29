@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { SavedBadgeDocument } from 'types/badge';
+import { IBadge } from 'types/badge';
 
-const badgeSchema = new mongoose.Schema(
+const badgeSchema = new mongoose.Schema<IBadge>(
   {
     label: { type: String, required: [true, 'label not provided!'] },
     body: { type: String, required: [true, 'body not provided!'] },
@@ -15,4 +15,4 @@ const badgeSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model<SavedBadgeDocument>('Badge', badgeSchema);
+export default mongoose.model<IBadge>('Badge', badgeSchema);
