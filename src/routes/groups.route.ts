@@ -6,11 +6,11 @@ import { groupUpload } from '../utils/multer';
 
 const router = express.Router();
 
-router.get('/', controller.all);
+router.get('/', controller.allGroups);
 router.get('/search', controller.search);
-router.get('/:id', controller.view);
-router.post('/', validation.create, controller.create);
-router.patch('/:id', authorization, groupUpload, controller.update);
-router.delete('/:id', authorization, controller.delete);
+router.get('/:id', controller.getGroup);
+router.post('/', groupUpload, validation.create, controller.createGroup);
+router.patch('/:id', authorization, groupUpload, controller.updateGroup);
+router.delete('/:id', authorization, controller.deleteGroup);
 
 export default router;

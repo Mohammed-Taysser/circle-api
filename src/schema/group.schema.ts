@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { SavedGroupDocument } from 'types/group';
+import { IGroup } from 'types/group';
 
 const groupSchema = new mongoose.Schema(
   {
@@ -32,4 +32,4 @@ const groupSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model<SavedGroupDocument>('Group', groupSchema);
+export default mongoose.model<IGroup>('Group', groupSchema);

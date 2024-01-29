@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryUploaderType, MFile } from 'types/app';
+import { MFile } from 'types/app';
 import CONFIG from '../core/config';
 
 cloudinary.config({
@@ -24,18 +24,6 @@ async function destroyer(url: string) {
   if (id) {
     cloudinary.uploader.destroy(id);
   }
-}
-
-function uploadAvatar(file: string, type: CloudinaryUploaderType) {
-  return cloudinary.uploader.upload(file, {
-    folder: `circle/${type}/avatar`,
-  });
-}
-
-function uploadCover(file: string, type: CloudinaryUploaderType) {
-  return cloudinary.uploader.upload(file, {
-    folder: `circle/${type}/cover`,
-  });
 }
 
 const uploadUserAvatar = async (avatar: MFile[], oldAvatar: string) => {
@@ -77,15 +65,42 @@ const uploadBadgePicture = async (picture: MFile, oldPicture?: string) => {
   return uploadedPicture.secure_url;
 };
 
+const uploadGroupAvatar = async (avatar: MFile[], oldAvatar?: string) => {
+  if (oldAvatar) {
+    await destroyer(oldAvatar);
+  }
+
+  const uploadedAvatar = await cloudinary.uploader.upload(avatar[0].path, {
+    folder: `circle/groups/avatar`,
+    resource_type: 'image',
+  });
+
+  return uploadedAvatar.secure_url;
+};
+
+const uploadGroupCover = async (cover: MFile[], oldCover?: string) => {
+  if (oldCover) {
+    await destroyer(oldCover);
+  }
+
+  const uploadedCover = await cloudinary.uploader.upload(cover[0].path, {
+    folder: `circle/groups/cover`,
+    resource_type: 'image',
+  });
+
+  return uploadedCover.secure_url;
+};
+
 export default {
-  uploadAvatar,
-  uploadCover,
-  destroyer,
   users: {
     uploadCover: uploadUserCover,
     uploadAvatar: uploadUserAvatar,
   },
   badges: {
     uploadPicture: uploadBadgePicture,
+  },
+  groups: {
+    uploadCover: uploadGroupCover,
+    uploadAvatar: uploadGroupAvatar,
   },
 };

@@ -1,21 +1,22 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import service from '../services/group.services';
+import schema from '../schema/group.schema';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
-import { IRequest } from 'types/app';
+import { IRequest, MFile } from 'types/app';
+import { Group } from 'types/group';
 
-async function all(request: Request, response: Response) {
+async function allGroups(request: Request, response: Response) {
   const pagination = calculatePagination(request);
 
   try {
-    const total = await service.countDocuments();
+    const total = await schema.countDocuments();
 
-    await service
-      .all()
+    await schema
+      .find()
       .skip(pagination.skip)
       .limit(pagination.limit)
-
+      .populate('badges')
       .then((groups) => {
         response.status(statusCode.OK).json({ groups, total });
       });
@@ -24,12 +25,12 @@ async function all(request: Request, response: Response) {
   }
 }
 
-async function view(request: Request, response: Response) {
+async function getGroup(request: Request, response: Response) {
   const { id } = request.params;
 
-  await service
-    .getById(id)
-
+  await schema
+    .findById(id)
+    .populate('badges')
     .then((group) => {
       if (group) {
         response.status(statusCode.OK).json({ group });
@@ -42,10 +43,27 @@ async function view(request: Request, response: Response) {
     });
 }
 
-async function create(request: Request, response: Response) {
+async function createGroup(req: Request, response: Response) {
+  const request = req as IRequest;
+
+  const files = request.files as Record<string, MFile[]>;
+
   try {
-    await service
-      .save(request.body)
+    const body: Partial<Group> = {
+      visibility: request.body?.visibility,
+      name: request.body?.name,
+    };
+
+    if (files?.cover) {
+      body.cover = await cloudinary.groups.uploadCover(files.cover);
+    }
+
+    if (files?.avatar) {
+      body.avatar = await cloudinary.groups.uploadAvatar(files.avatar);
+    }
+
+    await new schema(body)
+      .save()
       .then((group) => {
         response.status(statusCode.CREATED).json({ group });
       })
@@ -57,42 +75,41 @@ async function create(request: Request, response: Response) {
   }
 }
 
-async function update(req: Request, response: Response) {
+async function updateGroup(req: Request, response: Response) {
   const request = req as IRequest;
 
-  const files = request.files as Record<string, Express.Multer.File[]>;
+  const files = request.files as Record<string, MFile[]>;
 
   const { id } = request.params;
 
-  await service
-    .getById(id)
-
+  await schema
+    .findById(id)
+    .populate('badges')
     .then(async (groupInstance) => {
       if (groupInstance) {
         try {
-          const body = { ...request.body };
+          const body: Partial<Group> = {
+            visibility: request.body?.visibility,
+            name: request.body?.name,
+          };
 
           if (files?.cover) {
-            await cloudinary.destroyer(groupInstance.cover);
-
-            const cover = await cloudinary.uploadCover(
-              files.cover[0].path,
-              'groups'
+            body.cover = await cloudinary.groups.uploadCover(
+              files.cover,
+              groupInstance.cover
             );
-            body.cover = cover.secure_url;
           }
 
           if (files?.avatar) {
-            await cloudinary.destroyer(groupInstance.avatar);
-
-            const avatar = await cloudinary.uploadAvatar(
-              files.avatar[0].path,
-              'groups'
+            body.avatar = await cloudinary.groups.uploadAvatar(
+              files.avatar,
+              groupInstance.avatar
             );
-            body.avatar = avatar.secure_url;
           }
 
-          const group = await service.update(id, body);
+          const group = await schema
+            .findByIdAndUpdate(id, body)
+            .populate('badges');
 
           response.status(statusCode.OK).json({ group });
         } catch (error) {
@@ -111,14 +128,14 @@ async function update(req: Request, response: Response) {
     });
 }
 
-async function deleteItem(req: Request, response: Response) {
+async function deleteGroup(req: Request, response: Response) {
   const request = req as IRequest;
 
   const { id } = request.params;
 
-  await service
-    .delete(id)
-
+  await schema
+    .findByIdAndDelete(id)
+    .populate('badges')
     .then((group) => {
       if (group) {
         response.status(statusCode.OK).json({ group });
@@ -158,10 +175,10 @@ async function search(request: Request, response: Response) {
     $or: [{ name: { $regex: searchQuery, $options: 'i' } }],
   };
 
-  const total = await service.countDocuments(queryFilter);
+  const total = await schema.countDocuments(queryFilter);
 
-  await service
-    .filter(queryFilter)
+  await schema
+    .find(queryFilter)
     .skip(pagination.skip)
     .limit(pagination.limit)
     .sort(sort)
@@ -174,4 +191,11 @@ async function search(request: Request, response: Response) {
     });
 }
 
-export default { all, view, create, delete: deleteItem, update, search };
+export default {
+  allGroups,
+  getGroup,
+  createGroup,
+  deleteGroup,
+  updateGroup,
+  search,
+};

@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { User } from './user';
 
-export interface Configuration {
+interface Configuration {
   env: string;
   server: {
     port: number;
@@ -20,7 +20,7 @@ export interface Configuration {
   };
 }
 
-export interface IRequest extends Request {
+interface IRequest extends Request {
   user: User;
 }
 
@@ -34,5 +34,4 @@ interface JwtTokenPayload {
 }
 
 // Cloudinary
-type CloudinaryUploaderType = 'users' | 'groups' | 'badges';
 type MFile = Express.Multer.File;
