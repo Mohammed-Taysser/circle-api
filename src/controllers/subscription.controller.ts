@@ -1,20 +1,20 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import service from '../services/subscription.services';
+import schema from '../schema/subscription.schema';
 import { calculatePagination } from '../utils/pagination';
 
 async function all(request: Request, response: Response) {
   const pagination = calculatePagination(request);
 
   try {
-    const total = await service.countDocuments();
+    const total = await schema.countDocuments();
 
-    await service
-      .all()
+    await schema
+      .find()
       .skip(pagination.skip)
       .limit(pagination.limit)
-      .then((subscription) => {
-        response.status(statusCode.OK).json({ subscription, total });
+      .then((subscriptions) => {
+        response.status(statusCode.OK).json({ subscriptions, total });
       });
   } catch (error) {
     response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
@@ -22,10 +22,10 @@ async function all(request: Request, response: Response) {
 }
 
 async function subscribe(request: Request, response: Response) {
-  await service
-    .save({
-      email: request.body.email,
-    })
+  await new schema({
+    email: request.body.email,
+  })
+    .save()
     .then((subscribe) => {
       response.status(statusCode.OK).json({ subscribe });
     })
@@ -37,8 +37,8 @@ async function subscribe(request: Request, response: Response) {
 async function isEmailSubscribe(request: Request, response: Response) {
   const email = request.query.email as string;
 
-  await service
-    .getByEmail(email)
+  await schema
+    .findOne({ email })
     .then((subscribe) => {
       if (subscribe) {
         response.status(statusCode.OK).json({ subscribe });

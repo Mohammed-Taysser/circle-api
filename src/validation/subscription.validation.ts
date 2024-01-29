@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import statusCode from 'http-status-codes';
-import service from '../services/subscription.services';
+import schema from '../schema/subscription.schema';
 
 const subscription = [
   check('email')
@@ -13,9 +13,9 @@ const subscription = [
     .isEmail()
     .withMessage('Invalid email address!')
     .bail()
-    .custom(async (value) => {
-      await service
-        .getByEmail(value)
+    .custom(async (email) => {
+      await schema
+        .find({ email })
         .then((subscription) => {
           if (subscription) {
             return Promise.reject('Email already in use');
@@ -46,7 +46,7 @@ const emailSubscriptionVerify = [
     .bail()
     .isEmail()
     .withMessage('Invalid email address!')
-    .bail()
+    .bail(),
 ];
 
 export default {

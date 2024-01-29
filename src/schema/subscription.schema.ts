@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
-import { SavedSubscriptionDocument } from 'types/subscription';
+import { ISubscription } from 'types/subscription';
 
-const subscriptionSchema = new mongoose.Schema(
+const subscriptionSchema = new mongoose.Schema<ISubscription>(
   {
     email: {
       type: String,
       required: [true, 'email not provided!'],
-      unique: [true, 'email already exists!'],
+      unique: true,
     },
     isVerified: { type: Boolean, default: false },
   },
@@ -15,7 +15,7 @@ const subscriptionSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model<SavedSubscriptionDocument>(
+export default mongoose.model<ISubscription>(
   'Subscription',
   subscriptionSchema
 );
