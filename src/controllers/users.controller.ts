@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { IRequest } from 'types/app';
+import { IRequest, MFile } from 'types/app';
 import schema from '../schema/user.schema';
 import cloudinary from '../utils/cloudinary';
 import { calculatePagination } from '../utils/pagination';
@@ -47,7 +47,7 @@ async function getUser(request: Request, response: Response) {
 async function updateUser(req: Request, response: Response) {
   const request = req as IRequest;
 
-  const files = request.files as Record<string, Express.Multer.File[]>;
+  const files = request.files as Record<string, MFile[]>;
 
   const { id } = request.params;
 
@@ -58,7 +58,7 @@ async function updateUser(req: Request, response: Response) {
     .then(async (userInstance) => {
       if (userInstance) {
         try {
-          const body:Partial<User> = {
+          const body: Partial<User> = {
             role: request.body?.role,
             firstName: request.body?.firstName,
             lastName: request.body?.lastName,
@@ -174,9 +174,9 @@ async function search(request: Request, response: Response) {
 }
 
 export default {
-   allUsers,
-   getUser,
-   deleteUser,
-   updateUser,
+  allUsers,
+  getUser,
+  deleteUser,
+  updateUser,
   search,
 };
