@@ -61,7 +61,8 @@ mongoose
   .connect(config.server.mongoUrl)
   .then(() => {
     app.listen(config.server.port, () => {
-      console.log(`🚀 API Server listening on port:${config.server.port}`);
+      console.log(`🚀 API Server listening on http://localhost:${config.server.port}`);
+      console.log(`See http://localhost:${config.server.port}/api/v1/health-check`);
 
       // mount api routes
       app.use('/api/v1', routes);

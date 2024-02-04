@@ -7,7 +7,7 @@ const serverError = async (
   response: Response,
   _next: NextFunction
 ) => {
-  response.status(statusCode.BAD_REQUEST).json({ error });
+  response.status(statusCode.BAD_REQUEST).json({ error: error.message });
 };
 
 export default serverError;
