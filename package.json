@@ -5,7 +5,10 @@
   "main": "src/app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build": "tsc",
+    "preview": "rimraf ./build && tsc",
+    "start": "node build/app.js"
   },
   "author": "",
   "license": "ISC",
