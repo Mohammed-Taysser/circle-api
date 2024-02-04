@@ -7,8 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
     "build": "tsc",
-    "preview": "rimraf ./build && tsc",
-    "start": "node build/app.js"
+    "preview": "rimraf ./dist && tsc",
+    "start": "node dist/app.js"
+  },
+  "engines" : { 
+    "node" : ">=16.0.0" 
   },
   "author": "",
   "license": "ISC",
