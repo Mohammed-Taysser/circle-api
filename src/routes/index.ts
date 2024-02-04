@@ -2,6 +2,7 @@ import express from 'express';
 
 import authRoutes from './auth.route';
 import badgesRoutes from './badge.route';
+import eventsRoutes from './event.route';
 import groupsRoutes from './groups.route';
 import helperRoutes from './helper.route';
 import postsRoutes from './posts.route';
@@ -17,5 +18,6 @@ router.use('/groups', groupsRoutes);
 router.use('/users', usersRoutes);
 router.use('/posts', postsRoutes);
 router.use('/badges', badgesRoutes);
+router.use('/events', eventsRoutes);
 
 export default router;
