@@ -6,24 +6,30 @@ const groupSchema = new mongoose.Schema(
     visibility: {
       type: String,
       default: 'public',
-      enum: ['public', 'private'],
-      required: [true, 'Please specify group visibility'],
+      enum: ['public', 'private', 'friends'],
     },
-    name: { type: String, required: [true, 'name not provided!'] },
+    name: {
+      type: String,
+      required: [true, 'name not provided!'],
+      trim: true,
+      minlength: [2, 'name too short!'],
+      maxlength: [50, 'name too long!'],
+    },
     avatar: {
       type: String,
-      default:
-        'https://res.cloudinary.com/mohammed-taysser/image/upload/v1654679434/paperCuts/authors/avatar-2_grpukn.png',
+      default: '/avatar.jpg',
+      trim: true,
     },
     cover: {
-			type: String,
-			default:
-				'https://res.cloudinary.com/mohammed-taysser/image/upload/v1657350049/lama/users/5437842_py0e8h.jpg',
-		},
+      type: String,
+      default: '/cover.jpg',
+      trim: true,
+    },
     badges: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Badge',
+        autopopulate: true,
       },
     ],
   },

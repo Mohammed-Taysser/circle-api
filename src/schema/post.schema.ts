@@ -72,10 +72,7 @@ const postSchema = new Schema<IPost>(
     },
   },
   {
-    timestamps: {
-      createdAt: 'publishAt',
-      updatedAt: 'editAt',
-    },
+    timestamps:true,
   }
 );
 

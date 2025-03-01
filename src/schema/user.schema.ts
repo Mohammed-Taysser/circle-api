@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { IUser } from 'types/user';
-import { hashPassword } from '../utils/password';
+import { hashPassword } from '../utils/bcrypt';
 
 const userSchema = new mongoose.Schema(
   {
@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'username not provided!'],
       unique: [true, 'username already exists!'],
+      max: [100, 'username is too long!'],
+      min: [8, 'username is too short!'],
     },
     role: {
       type: String,
@@ -18,18 +20,17 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: [true, 'last name not provided!'] },
     avatar: {
       type: String,
-      default:
-        'https://res.cloudinary.com/mohammed-taysser/image/upload/v1654679434/paperCuts/authors/avatar-2_grpukn.png',
+      default: '/avatar.jpg',
     },
     cover: {
       type: String,
-      default:
-        'https://res.cloudinary.com/mohammed-taysser/image/upload/v1657350049/lama/users/5437842_py0e8h.jpg',
+      default: '/cover.jpg',
     },
     email: {
       type: String,
       required: [true, 'Email not provided!'],
       unique: [true, 'Email already exists!'],
+      max: [100, 'Email is too long!'],
     },
     password: {
       type: String,
@@ -49,10 +50,7 @@ const userSchema = new mongoose.Schema(
     ],
   },
   {
-    timestamps: {
-      createdAt: 'joinAt',
-      updatedAt: 'updatedAt',
-    },
+    timestamps: true,
   }
 );
 

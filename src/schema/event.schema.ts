@@ -3,10 +3,27 @@ import { IEvent } from 'types/event';
 
 const eventSchema = new mongoose.Schema<IEvent>(
   {
-    title: { type: String, required: [true, 'label not provided!'] },
-    body: { type: String, default: '' },
-    startDate: { type: Date, required: [true, 'Start Date not provided!'] },
-    endDate: { type: Date, required: [true, 'End Date not provided!'] },
+    title: {
+      type: String,
+      required: [true, 'Title is required!'],
+      trim: true,
+      minlength: [3, 'Title should be at least 3 characters!'],
+      maxlength: [100, 'Title should be at most 100 characters!'],
+    },
+    body: {
+      type: String,
+      default: '',
+      trim: true,
+      maxlength: [5000, 'Body should be at most 5000 characters!'],
+    },
+    startDate: {
+      type: Date,
+      required: [true, 'Start Date is required!'],
+    },
+    endDate: {
+      type: Date,
+      required: [true, 'End Date is required!'],
+    },
     allDay: {
       type: Boolean,
       default: true,
@@ -14,6 +31,7 @@ const eventSchema = new mongoose.Schema<IEvent>(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      required: [true, 'User is required!'],
     },
   },
   {

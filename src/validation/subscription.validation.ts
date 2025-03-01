@@ -15,7 +15,7 @@ const subscription = [
     .bail()
     .custom(async (email) => {
       await schema
-        .find({ email })
+        .findOne({ email })
         .then((subscription) => {
           if (subscription) {
             return Promise.reject('Email already in use');

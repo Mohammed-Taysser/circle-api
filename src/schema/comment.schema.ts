@@ -5,7 +5,8 @@ const commentSchema = new Schema<IComment>(
   {
     body: {
       type: String,
-      default: '',
+      trim: true,
+      required: [true, 'comment can\'t be empty!']
     },
     user: {
       type: Schema.Types.ObjectId,
@@ -17,10 +18,7 @@ const commentSchema = new Schema<IComment>(
     },
   },
   {
-    timestamps: {
-      createdAt: 'publishAt',
-      updatedAt: 'editAt',
-    },
+    timestamps:true
   }
 );
 

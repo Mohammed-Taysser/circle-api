@@ -3,7 +3,7 @@ import { check, validationResult } from 'express-validator';
 import statusCode from 'http-status-codes';
 import { IRequest } from 'types/app';
 import schema from '../schema/user.schema';
-import { comparePassword } from '../utils/password';
+import { comparePassword } from '../utils/bcrypt';
 
 const login = [
   check('password')

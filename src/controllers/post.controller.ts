@@ -1,425 +1,428 @@
-import { Request, Response } from 'express';
-import statusCode from 'http-status-codes';
-import { IRequest, MFile } from 'types/app';
-import commentSchema from '../schema/comment.schema';
-import postSchema from '../schema/post.schema';
-import reactionSchema from '../schema/reaction.schema';
-import { calculatePagination } from '../utils/pagination';
-import cloudinary from '../utils/cloudinary';
+import { IPost } from 'types/post';
+import CrudService from '../core/CRUD';
+import schema from '../schema/post.schema';
 
-async function allPosts(request: Request, response: Response) {
-  const pagination = calculatePagination(request);
-
-  const total = await postSchema.countDocuments();
-
-  try {
-    const postsWithoutCount = await postSchema
-      .find()
-      .skip(pagination.skip)
-      .limit(pagination.limit)
-      .populate({
-        path: 'user',
-        select: 'firstName lastName username avatar',
-      })
-      .then((posts) => posts.map((post) => post.toObject()));
-
-    const posts = await Promise.all(
-      postsWithoutCount.map(async (post) => {
-        const comments = await commentSchema.countDocuments({
-          post: post._id,
-        });
-
-        const reactions = await reactionSchema.find({ post: post._id });
-
-        return { ...post, comments, reactions };
-      })
-    );
-
-    response.status(statusCode.OK).json({ posts, total });
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
+class PostController extends CrudService<IPost> {
+  constructor() {
+    super(schema);
   }
 }
 
-async function getPost(request: Request, response: Response) {
-  const { id } = request.params;
+export default new PostController();
 
-  try {
-    const post = await postSchema
-      .findById(id)
-      .populate({
-        path: 'user',
-        select: 'firstName lastName username avatar',
-      })
-      .then((post) => post?.toObject());
+// async function allPosts(request: Request, response: Response) {
+//   const pagination = calculatePagination(request);
 
-    const commentsCount = await commentSchema.countDocuments({ post: id });
+//   const total = await postSchema.countDocuments();
 
-    const reactions = await reactionSchema
-      .find({ post: id })
-      .populate({
-        path: 'user',
-        select: 'firstName lastName username avatar',
-      })
-      .select('-post');
+//   try {
+//     const postsWithoutCount = await postSchema
+//       .find()
+//       .skip(pagination.skip)
+//       .limit(pagination.limit)
+//       .populate({
+//         path: 'user',
+//         select: 'firstName lastName username avatar',
+//       })
+//       .then((posts) => posts.map((post) => post.toObject()));
 
-    if (post) {
-      post.comments = commentsCount;
+//     const posts = await Promise.all(
+//       postsWithoutCount.map(async (post) => {
+//         const comments = await commentSchema.countDocuments({
+//           post: post._id,
+//         });
 
-      post.reactions = reactions;
+//         const reactions = await reactionSchema.find({ post: post._id });
 
-      response.status(statusCode.OK).json({ post });
-    } else {
-      response.status(statusCode.NOT_FOUND).json({ error: 'post not exist' });
-    }
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
-  }
-}
+//         return { ...post, comments, reactions };
+//       })
+//     );
 
-async function createPost(req: Request, response: Response) {
-  const request = req as IRequest;
+//     response.status(statusCode.OK).json({ posts, total });
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
 
-  const files = request.files as Record<string, MFile[]>;
+// async function getPost(request: Request, response: Response) {
+//   const { id } = request.params;
 
-  try {
-    const body = {
-      user: request.user._id,
-      body: request.body?.body,
-      visibility: request.body?.visibility,
-      variant: request.body?.variant,
-      activity: request.body?.activity,
-      assets: {
-        gallery: request.body?.gallery,
-        youtube: request.body?.youtube,
-        audio: request.body?.audio,
-        video: request.body?.video,
-      },
-    };
+//   try {
+//     const post = await postSchema
+//       .findById(id)
+//       .populate({
+//         path: 'user',
+//         select: 'firstName lastName username avatar',
+//       })
+//       .then((post) => post?.toObject());
 
-    if (files?.video) {
-      body.assets.video = await cloudinary.posts.uploadVideo(files.video[0]);
-    }
+//     const commentsCount = await commentSchema.countDocuments({ post: id });
 
-    if (files?.audio) {
-      body.assets.audio = await cloudinary.posts.uploadAudio(files.audio[0]);
-    }
+//     const reactions = await reactionSchema
+//       .find({ post: id })
+//       .populate({
+//         path: 'user',
+//         select: 'firstName lastName username avatar',
+//       })
+//       .select('-post');
 
-    if (files?.gallery) {
-      body.assets.gallery = await cloudinary.posts.uploadGallery(files.gallery);
-    }
+//     if (post) {
+//       post.comments = commentsCount;
 
-    const savedPost = await new postSchema(body).save();
+//       post.reactions = reactions;
 
-    const post = await postSchema.findById(savedPost._id).populate({
-      path: 'user',
-      select: 'firstName lastName username avatar',
-    });
+//       response.status(statusCode.OK).json({ post });
+//     } else {
+//       response.status(statusCode.NOT_FOUND).json({ error: 'post not exist' });
+//     }
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
 
-    response.status(statusCode.CREATED).json({ post });
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
-  }
-}
+// async function createPost(req: Request, response: Response) {
+//   const request = req as IRequest;
 
-async function updatePost(req: Request, response: Response) {
-  const request = req as IRequest;
+//   const files = request.files as Record<string, MFile[]>;
 
-  const files = request.files as Record<string, MFile[]>;
+//   try {
+//     const body = {
+//       user: request.user._id,
+//       body: request.body?.body,
+//       visibility: request.body?.visibility,
+//       variant: request.body?.variant,
+//       activity: request.body?.activity,
+//       assets: {
+//         gallery: request.body?.gallery,
+//         youtube: request.body?.youtube,
+//         audio: request.body?.audio,
+//         video: request.body?.video,
+//       },
+//     };
 
-  const { id } = request.params;
+//     if (files?.video) {
+//       body.assets.video = await cloudinary.posts.uploadVideo(files.video[0]);
+//     }
 
-  await postSchema
-    .findById(id)
-    .then(async (postInstance) => {
-      if (postInstance) {
-        try {
-          const body = {
-            user: request.user._id,
-            body: request.body?.body,
-            visibility: request.body?.visibility,
-            variant: request.body?.variant,
-            activity: request.body?.activity,
-            assets: {
-              gallery: request.body?.gallery,
-              youtube: request.body?.youtube,
-              audio: request.body?.audio,
-              video: request.body?.video,
-            },
-          };
+//     if (files?.audio) {
+//       body.assets.audio = await cloudinary.posts.uploadAudio(files.audio[0]);
+//     }
 
-          if (files?.video) {
-            body.assets.video = await cloudinary.posts.uploadVideo(
-              files.video[0],
-              postInstance?.assets?.video
-            );
-          }
+//     if (files?.gallery) {
+//       body.assets.gallery = await cloudinary.posts.uploadGallery(files.gallery);
+//     }
 
-          if (files?.audio) {
-            body.assets.audio = await cloudinary.posts.uploadAudio(
-              files.audio[0],
-              postInstance?.assets?.audio
-            );
-          }
+//     const savedPost = await new postSchema(body).save();
 
-          if (files?.gallery) {
-            body.assets.gallery = await cloudinary.posts.uploadGallery(
-              files.gallery,
-              postInstance?.assets?.gallery
-            );
-          }
+//     const post = await postSchema.findById(savedPost._id).populate({
+//       path: 'user',
+//       select: 'firstName lastName username avatar',
+//     });
 
-          const post = await postSchema
-            .findByIdAndUpdate(id, body, {
-              new: true,
-            })
-            .populate({
-              path: 'user',
-              select: 'firstName lastName username avatar',
-            });
+//     response.status(statusCode.CREATED).json({ post });
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
 
-          response.status(statusCode.OK).json({ post });
-        } catch (error) {
-          response.status(statusCode.BAD_REQUEST).json({ error });
-        }
-      } else {
-        response
-          .status(statusCode.BAD_REQUEST)
-          .json({ error: 'Post Not Exist' });
-      }
-    })
-    .catch(() => {
-      response.status(statusCode.BAD_REQUEST).json({ error: 'Post Not Exist' });
-    });
-}
+// async function updatePost(req: Request, response: Response) {
+//   const request = req as IRequest;
 
-async function deletePost(req: Request, response: Response) {
-  const request = req as IRequest;
+//   const files = request.files as Record<string, MFile[]>;
 
-  const { id } = request.params;
+//   const { id } = request.params;
 
-  try {
-    const deletedPost = await postSchema
-      .findByIdAndDelete(id, { new: true })
-      .populate({
-        path: 'user',
-        select: 'firstName lastName username avatar',
-      })
-      .then((post) => post?.toObject());
+//   await postSchema
+//     .findById(id)
+//     .then(async (postInstance) => {
+//       if (postInstance) {
+//         try {
+//           const body = {
+//             user: request.user._id,
+//             body: request.body?.body,
+//             visibility: request.body?.visibility,
+//             variant: request.body?.variant,
+//             activity: request.body?.activity,
+//             assets: {
+//               gallery: request.body?.gallery,
+//               youtube: request.body?.youtube,
+//               audio: request.body?.audio,
+//               video: request.body?.video,
+//             },
+//           };
 
-    if (deletedPost) {
-      const comments = await commentSchema.deleteMany({ post: id });
+//           if (files?.video) {
+//             body.assets.video = await cloudinary.posts.uploadVideo(
+//               files.video[0],
+//               postInstance?.assets?.video
+//             );
+//           }
 
-      const reactions = await reactionSchema.deleteMany({ post: id });
+//           if (files?.audio) {
+//             body.assets.audio = await cloudinary.posts.uploadAudio(
+//               files.audio[0],
+//               postInstance?.assets?.audio
+//             );
+//           }
 
-      response.status(statusCode.OK).json({
-        post: {
-          ...deletedPost,
-          comments: comments.deletedCount,
-          reactions: reactions.deletedCount,
-        },
-      });
-    } else {
-      response.status(statusCode.NOT_FOUND).json({ error: 'post not exist' });
-    }
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
-  }
-}
+//           if (files?.gallery) {
+//             body.assets.gallery = await cloudinary.posts.uploadGallery(
+//               files.gallery,
+//               postInstance?.assets?.gallery
+//             );
+//           }
 
-async function search(request: Request, response: Response) {
-  const pagination = calculatePagination(request);
-  const searchQuery = request.query.query ?? '';
+//           const post = await postSchema
+//             .findByIdAndUpdate(id, body, {
+//               new: true,
+//             })
+//             .populate({
+//               path: 'user',
+//               select: 'firstName lastName username avatar',
+//             });
 
-  let sort = '-createAt';
+//           response.status(statusCode.OK).json({ post });
+//         } catch (error) {
+//           response.status(statusCode.BAD_REQUEST).json({ error });
+//         }
+//       } else {
+//         response
+//           .status(statusCode.BAD_REQUEST)
+//           .json({ error: 'Post Not Exist' });
+//       }
+//     })
+//     .catch(() => {
+//       response.status(statusCode.BAD_REQUEST).json({ error: 'Post Not Exist' });
+//     });
+// }
 
-  switch (request.query.sort) {
-    case 'latest':
-      sort = '-createdAt';
-      break;
-    case 'oldest':
-      sort = 'createdAt';
-      break;
-  }
+// async function deletePost(req: Request, response: Response) {
+//   const request = req as IRequest;
 
-  const queryFilter = {
-    $or: [{ body: { $regex: searchQuery, $options: 'i' } }],
-  };
+//   const { id } = request.params;
 
-  try {
-    const total = await postSchema.countDocuments(queryFilter);
+//   try {
+//     const deletedPost = await postSchema
+//       .findByIdAndDelete(id, { new: true })
+//       .populate({
+//         path: 'user',
+//         select: 'firstName lastName username avatar',
+//       })
+//       .then((post) => post?.toObject());
 
-    const postsWithoutComments = await postSchema
-      .find(queryFilter)
-      .skip(pagination.skip)
-      .limit(pagination.limit)
-      .sort(sort)
-      .populate({
-        path: 'user',
-        select: 'firstName lastName username avatar',
-      });
+//     if (deletedPost) {
+//       const comments = await commentSchema.deleteMany({ post: id });
 
-    const posts = await Promise.all(
-      postsWithoutComments.map(async (post) => {
-        const comments = await commentSchema.countDocuments({ post: post._id });
+//       const reactions = await reactionSchema.deleteMany({ post: id });
 
-        const reactions = await reactionSchema.find({ post: post._id });
-        return { ...post.toObject(), comments, reactions };
-      })
-    );
+//       response.status(statusCode.OK).json({
+//         post: {
+//           ...deletedPost,
+//           comments: comments.deletedCount,
+//           reactions: reactions.deletedCount,
+//         },
+//       });
+//     } else {
+//       response.status(statusCode.NOT_FOUND).json({ error: 'post not exist' });
+//     }
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
 
-    response.status(statusCode.OK).json({ posts, total });
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
-  }
-}
+// async function search(request: Request, response: Response) {
+//   const pagination = calculatePagination(request);
+//   const searchQuery = request.query.query ?? '';
 
-async function getPostComments(request: Request, response: Response) {
-  const pagination = calculatePagination(request);
+//   let sort = '-createAt';
 
-  const total = await commentSchema.countDocuments({
-    post: request.params.postId,
-  });
+//   switch (request.query.sort) {
+//     case 'latest':
+//       sort = '-createdAt';
+//       break;
+//     case 'oldest':
+//       sort = 'createdAt';
+//       break;
+//   }
 
-  await commentSchema
-    .find({ post: request.params.postId })
-    .skip(pagination.skip)
-    .limit(pagination.limit)
-    .populate({
-      path: 'user',
-      select: 'firstName lastName username avatar',
-    })
-    .select('-post')
-    .then((comments) => {
-      response.status(statusCode.OK).json({ comments, total });
-    })
-    .catch((error) => {
-      response.status(statusCode.BAD_REQUEST).json({ error });
-    });
-}
+//   const queryFilter = {
+//     $or: [{ body: { $regex: searchQuery, $options: 'i' } }],
+//   };
 
-async function addComment(req: Request, response: Response) {
-  const request = req as IRequest;
+//   try {
+//     const total = await postSchema.countDocuments(queryFilter);
 
-  const body = {
-    body: request.body.body,
-    user: request.user._id,
-    post: request.params.postId,
-  };
+//     const postsWithoutComments = await postSchema
+//       .find(queryFilter)
+//       .skip(pagination.skip)
+//       .limit(pagination.limit)
+//       .sort(sort)
+//       .populate({
+//         path: 'user',
+//         select: 'firstName lastName username avatar',
+//       });
 
-  try {
-    const savedComment = await new commentSchema(body).save();
+//     const posts = await Promise.all(
+//       postsWithoutComments.map(async (post) => {
+//         const comments = await commentSchema.countDocuments({ post: post._id });
 
-    const comment = await commentSchema
-      .findById(savedComment._id)
-      .populate({
-        path: 'user',
-        select: 'firstName lastName username avatar',
-      })
-      .select('-post');
+//         const reactions = await reactionSchema.find({ post: post._id });
+//         return { ...post.toObject(), comments, reactions };
+//       })
+//     );
 
-    response.status(statusCode.OK).json({ comment });
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
-  }
-}
+//     response.status(statusCode.OK).json({ posts, total });
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
 
-async function deleteComment(req: Request, response: Response) {
-  const request = req as IRequest;
+// async function getPostComments(request: Request, response: Response) {
+//   const pagination = calculatePagination(request);
 
-  const { commentId } = request.params;
+//   const total = await commentSchema.countDocuments({
+//     post: request.params.postId,
+//   });
 
-  await commentSchema
-    .findByIdAndDelete(commentId)
-    .populate({
-      path: 'user',
-      select: 'firstName lastName username avatar',
-    })
-    .select('-post')
-    .then((comment) => {
-      if (comment) {
-        response.status(statusCode.OK).json({ comment });
-      } else {
-        response
-          .status(statusCode.NOT_FOUND)
-          .json({ error: 'comment not exist' });
-      }
-    })
-    .catch((error) => {
-      response.status(statusCode.BAD_REQUEST).json({ error });
-    });
-}
+//   await commentSchema
+//     .find({ post: request.params.postId })
+//     .skip(pagination.skip)
+//     .limit(pagination.limit)
+//     .populate({
+//       path: 'user',
+//       select: 'firstName lastName username avatar',
+//     })
+//     .select('-post')
+//     .then((comments) => {
+//       response.status(statusCode.OK).json({ comments, total });
+//     })
+//     .catch((error) => {
+//       response.status(statusCode.BAD_REQUEST).json({ error });
+//     });
+// }
 
-async function react(req: Request, response: Response) {
-  const request = req as IRequest;
+// async function addComment(req: Request, response: Response) {
+//   const request = req as IRequest;
 
-  const body = {
-    react: request.body.react,
-    user: request.user._id,
-    post: request.params.postId,
-  };
+//   const body = {
+//     body: request.body.body,
+//     user: request.user._id,
+//     post: request.params.postId,
+//   };
 
-  try {
-    const existingReaction = await reactionSchema.findOne({
-      post: request.params.postId,
-      user: request.user._id,
-    });
+//   try {
+//     const savedComment = await new commentSchema(body).save();
 
-    if (existingReaction) {
-      if (existingReaction.react === body.react) {
-        await reactionSchema
-          .findByIdAndDelete(existingReaction._id, { new: true })
-          .populate({
-            path: 'user',
-            select: 'firstName lastName username avatar',
-          })
-          .select('-post')
-          .then((reaction) => {
-            response.status(statusCode.OK).json({ reaction });
-          })
-          .catch((error) => {
-            response.status(statusCode.BAD_REQUEST).json({ error });
-          });
-      } else {
-        const reaction = await reactionSchema
-          .findByIdAndUpdate(existingReaction._id, body, { new: true })
-          .populate({
-            path: 'user',
-            select: 'firstName lastName username avatar',
-          })
-          .select('-post')
-          .then((reaction) => reaction?.toObject());
+//     const comment = await commentSchema
+//       .findById(savedComment._id)
+//       .populate({
+//         path: 'user',
+//         select: 'firstName lastName username avatar',
+//       })
+//       .select('-post');
 
-        response.status(statusCode.OK).json({ reaction });
-      }
-    } else {
-      const savedReaction = await new reactionSchema(body).save();
+//     response.status(statusCode.OK).json({ comment });
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
 
-      const reaction = await reactionSchema
-        .findById(savedReaction._id)
-        .populate({
-          path: 'user',
-          select: 'firstName lastName username avatar',
-        })
-        .select('-post');
-      response.status(statusCode.OK).json({ reaction });
-    }
-  } catch (error) {
-    response.status(statusCode.BAD_REQUEST).json({ error });
-  }
-}
+// async function deleteComment(req: Request, response: Response) {
+//   const request = req as IRequest;
 
-export default {
-  allPosts,
-  getPost,
-  createPost,
-  deletePost,
-  updatePost,
-  search,
+//   const { commentId } = request.params;
 
-  getPostComments,
-  addComment,
-  deleteComment,
+//   await commentSchema
+//     .findByIdAndDelete(commentId)
+//     .populate({
+//       path: 'user',
+//       select: 'firstName lastName username avatar',
+//     })
+//     .select('-post')
+//     .then((comment) => {
+//       if (comment) {
+//         response.status(statusCode.OK).json({ comment });
+//       } else {
+//         response
+//           .status(statusCode.NOT_FOUND)
+//           .json({ error: 'comment not exist' });
+//       }
+//     })
+//     .catch((error) => {
+//       response.status(statusCode.BAD_REQUEST).json({ error });
+//     });
+// }
 
-  react,
-};
+// async function react(req: Request, response: Response) {
+//   const request = req as IRequest;
+
+//   const body = {
+//     react: request.body.react,
+//     user: request.user._id,
+//     post: request.params.postId,
+//   };
+
+//   try {
+//     const existingReaction = await reactionSchema.findOne({
+//       post: request.params.postId,
+//       user: request.user._id,
+//     });
+
+//     if (existingReaction) {
+//       if (existingReaction.react === body.react) {
+//         await reactionSchema
+//           .findByIdAndDelete(existingReaction._id, { new: true })
+//           .populate({
+//             path: 'user',
+//             select: 'firstName lastName username avatar',
+//           })
+//           .select('-post')
+//           .then((reaction) => {
+//             response.status(statusCode.OK).json({ reaction });
+//           })
+//           .catch((error) => {
+//             response.status(statusCode.BAD_REQUEST).json({ error });
+//           });
+//       } else {
+//         const reaction = await reactionSchema
+//           .findByIdAndUpdate(existingReaction._id, body, { new: true })
+//           .populate({
+//             path: 'user',
+//             select: 'firstName lastName username avatar',
+//           })
+//           .select('-post')
+//           .then((reaction) => reaction?.toObject());
+
+//         response.status(statusCode.OK).json({ reaction });
+//       }
+//     } else {
+//       const savedReaction = await new reactionSchema(body).save();
+
+//       const reaction = await reactionSchema
+//         .findById(savedReaction._id)
+//         .populate({
+//           path: 'user',
+//           select: 'firstName lastName username avatar',
+//         })
+//         .select('-post');
+//       response.status(statusCode.OK).json({ reaction });
+//     }
+//   } catch (error) {
+//     response.status(statusCode.BAD_REQUEST).json({ error });
+//   }
+// }
+
+// export default {
+//   allPosts,
+//   getPost,
+//   createPost,
+//   deletePost,
+//   updatePost,
+//   search,
+
+//   getPostComments,
+//   addComment,
+//   deleteComment,
+
+//   react,
+// };

@@ -1,36 +1,46 @@
 import { NextFunction, Request, Response } from 'express';
 import statusCode from 'http-status-codes';
+import Joi from 'joi';
 
 const createBadge = async (
   request: Request,
   response: Response,
   next: NextFunction
 ) => {
-  const { body } = request;
+  const schema = Joi.object().keys({
+    body: Joi.string().required(),
+    label: Joi.string().required(),
+  });
 
-  const errors = [];
+  const { error } = schema.validate(request.body);
 
-  if (!body.body) {
-    errors.push({ field: 'body', msg: "body can't be empty" });
-  }
-
-  if (!body.label) {
-    errors.push({ field: 'label', msg: "label can't be empty" });
-  }
-
-  if (!request.file) {
-    errors.push({ field: 'picture', msg: "picture can't be empty" });
-  }
-
-  if (body.body && body.label && request.file) {
-    request.body.picture = request.file;
-
-    next();
+  if (error) {
+    response.status(statusCode.BAD_REQUEST).json({ errors: error.details });
   } else {
-    response.status(statusCode.BAD_REQUEST).json({ errors });
+    next();
+  }
+};
+
+const updateBadge = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const schema = Joi.object().keys({
+    body: Joi.string(),
+    label: Joi.string(),
+  });
+
+  const { error } = schema.validate(request.body);
+
+  if (error) {
+    response.status(statusCode.BAD_REQUEST).json({ errors: error.details });
+  } else {
+    next();
   }
 };
 
 export default {
   create: createBadge,
+  update: updateBadge,
 };

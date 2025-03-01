@@ -12,12 +12,6 @@ interface Configuration {
     refresh: string;
     life: string;
   };
-
-  cloudinary: {
-    cloudName: string;
-    apiKey: string;
-    apiSecret: string;
-  };
 }
 
 interface IRequest extends Request {
@@ -32,6 +26,3 @@ interface JwtTokenPayload {
   lastName: string;
   username: string;
 }
-
-// Cloudinary
-type MFile = Express.Multer.File;

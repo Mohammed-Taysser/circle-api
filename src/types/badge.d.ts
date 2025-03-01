@@ -1,12 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 
 interface Badge {
-  _id: string;
+  _id: ObjectId;
   label: string;
   body: string;
   picture: string;
-  earnedAt: Date;
-  updatedAt: Date;
 }
 
 type IBadge = mongoose.Document & Badge;
+

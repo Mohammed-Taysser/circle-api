@@ -18,10 +18,7 @@ const reactionSchema = new Schema<IReaction>(
     },
   },
   {
-    timestamps: {
-      createdAt: 'publishAt',
-      updatedAt: 'editAt',
-    },
+    timestamps: true
   }
 );
 

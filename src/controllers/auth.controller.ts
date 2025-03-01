@@ -39,6 +39,7 @@ async function refreshToken(request: Request, response: Response) {
   const { user } = request as IRequest;
 
   const token = await generateToken(user);
+
   response.status(statusCode.OK).json({ token });
 }
 

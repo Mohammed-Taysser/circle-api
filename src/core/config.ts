@@ -45,12 +45,6 @@ const CONFIG: Configuration = {
     refresh: envVars.JWT_REFRESH_KEY,
     life: envVars.JWT_LIFE_TIME,
   },
-
-  cloudinary: {
-    cloudName: envVars.CLOUDINARY_CLOUD_NAME,
-    apiKey: envVars.CLOUDINARY_API_KEY,
-    apiSecret: envVars.CLOUDINARY_API_SECRET,
-  },
 };
 
 export default CONFIG;

@@ -5,11 +5,10 @@ import validation from '../validation/event.validation';
 
 const router = express.Router();
 
-router.get('/', controller.allEvents);
-router.get('/search', controller.search);
-router.get('/:id', controller.getEvent);
-router.post('/', authorization, validation.create, controller.createEvent);
-router.patch('/:id', authorization, controller.updateEvent);
-router.delete('/:id', authorization, controller.deleteEvent);
+router.get('/', controller.getAll);
+router.get('/:id', controller.getById);
+router.post('/', authorization, validation.create, controller.create);
+router.patch('/:id', authorization, validation.update, controller.update);
+router.delete('/:id', authorization, controller.delete);
 
 export default router;
