@@ -11,3 +11,10 @@
 - [ ] create post on update cover or avatar
 - [x] add create post validation
 - [ ] replace search endpoint with all search
+- [ ] Add "port" change if used
+- [ ] restart server if "env" change
+- [ ] add logger
+- [ ] add cache
+- [ ] add rate limiter
+- [ ] add socket io
+- [ ] add admin panel

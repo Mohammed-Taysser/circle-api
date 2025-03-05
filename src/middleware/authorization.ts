@@ -14,17 +14,37 @@ const authorization = async (
 
   if (token?.startsWith('Bearer')) {
     try {
-      const user = verifyToken(token.split(' ')[1]);
+      const userJWT = verifyToken(token.split(' ')[1]);
 
-      const userDB = await schema.findById(String(user._id));
+      const userDB = await schema.findById(String(userJWT._id));
 
-      if (userDB) {
-        request.user = userDB;
-      } else {
-        response
+      if (!userDB) {
+        return response
           .status(statusCode.FORBIDDEN)
           .json({ error: `you aren't authorize, token is invalid` });
       }
+
+      if (userDB.status !== 'active') {
+        return response
+          .status(statusCode.FORBIDDEN)
+          .json({ error: "you aren't authorize, your account is inactive" });
+      }
+
+      if (!userDB.verified) {
+        return response
+          .status(statusCode.FORBIDDEN)
+          .json({
+            error: "you aren't authorize, your account is not verified",
+          });
+      }
+
+      if (userJWT.iat && userDB.passwordChangeAt.getTime() < userJWT.iat) {
+        return response
+          .status(statusCode.FORBIDDEN)
+          .json({ error: "you aren't authorize, please change your password" });
+      }
+
+      request.user = userDB;
 
       next();
     } catch (err) {

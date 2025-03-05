@@ -48,6 +48,24 @@ const userSchema = new mongoose.Schema(
         saveAt: { type: Date, default: new Date() },
       },
     ],
+    passwordChangeAt: {
+      type: Date,
+    },
+    status: {
+      type: String,
+      default: 'active',
+      enum: ['active', 'inactive', 'banned'],
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    passwordResetToken: {
+      type: String,
+    },
+    passwordResetExpires: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -57,7 +75,14 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', async function () {
   if (this.isModified('password')) {
     this.password = await hashPassword(this.password);
+    this.passwordChangeAt = new Date();
   }
 });
+
+// userSchema.pre(/^find/, function (next) {
+//   this.find({ isDeleted: { $ne: false } });
+
+//   next();
+// });
 
 export default mongoose.model<IUser>('User', userSchema);

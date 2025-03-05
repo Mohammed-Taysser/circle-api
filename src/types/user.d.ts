@@ -14,6 +14,13 @@ interface User {
   password: string;
   badges: Badge[];
   bookmarks: Post[];
+  passwordChangeAt: Date;
+  passwordResetToken: string;
+  passwordResetExpires: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  verified: boolean;
+  status: 'active' | 'inactive' | 'banned';
 }
 
 type IUser = Document & User;
