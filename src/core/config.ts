@@ -2,6 +2,8 @@ import 'dotenv/config';
 import Joi from 'joi';
 import { Configuration } from 'types/app';
 
+const durationRegex = /^\d+[smhd]$/; // Example: 10s, 30m, 1h, 7d
+
 const schema = Joi.object({
   NODE_ENV: Joi.string()
     .valid(...['development', 'production', 'test'])
@@ -18,7 +20,10 @@ const schema = Joi.object({
   JWT_REFRESH_KEY: Joi.string()
     .required()
     .description('JWT refresh secret key'),
-  JWT_LIFE_TIME: Joi.string().required().description('JWT expiration'),
+  JWT_LIFE_TIME: Joi.string()
+    .pattern(durationRegex)
+    .required()
+    .description('JWT expiration time (e.g., 10s, 30m, 1h, 7d)'),
 })
   .unknown()
   .required();

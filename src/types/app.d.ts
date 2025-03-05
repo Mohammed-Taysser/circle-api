@@ -1,5 +1,7 @@
 import { Request } from 'express';
 import { User } from './user';
+import { Secret } from 'jsonwebtoken';
+import { StringValue } from 'ms';
 
 interface Configuration {
   env: string;
@@ -8,9 +10,9 @@ interface Configuration {
     mongoUrl: string;
   };
   jwt: {
-    secret: string;
+    secret: Secret;
     refresh: string;
-    life: string;
+    life: StringValue | number;
   };
 }
 

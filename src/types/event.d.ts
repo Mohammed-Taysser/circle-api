@@ -11,6 +11,7 @@ interface Event {
   updatedAt: Date;
   allDay: boolean;
   user: User;
+  attendees: User[];
 }
 
 type IEvent = mongoose.Document & Event;

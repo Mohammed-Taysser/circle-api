@@ -31,11 +31,9 @@ const authorization = async (
       }
 
       if (!userDB.verified) {
-        return response
-          .status(statusCode.FORBIDDEN)
-          .json({
-            error: "you aren't authorize, your account is not verified",
-          });
+        return response.status(statusCode.FORBIDDEN).json({
+          error: "you aren't authorize, your account is not verified",
+        });
       }
 
       if (userJWT.iat && userDB.passwordChangeAt.getTime() < userJWT.iat) {
@@ -47,7 +45,7 @@ const authorization = async (
       request.user = userDB;
 
       next();
-    } catch (err) {
+    } catch (_error) {
       response
         .status(statusCode.FORBIDDEN)
         .json({ error: `you aren't authorize, token is invalid` });
