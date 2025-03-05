@@ -17,6 +17,7 @@ yarn.lock
 build
 .env
 temp
+.qodo
 
 # Editor directories and files
 .vscode/*
