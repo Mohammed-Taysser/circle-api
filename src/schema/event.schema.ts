@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { IEvent } from 'types/event';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const eventSchema = new mongoose.Schema<IEvent>(
+const eventSchema = new mongoose.Schema<Event>(
   {
     title: {
       type: String,
@@ -17,6 +17,7 @@ const eventSchema = new mongoose.Schema<IEvent>(
       maxlength: [5000, 'Body should be at most 5000 characters!'],
     },
     startDate: {
+      index: true,
       type: Date,
       required: [true, 'Start Date is required!'],
     },
@@ -31,7 +32,25 @@ const eventSchema = new mongoose.Schema<IEvent>(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      index: true,
       required: [true, 'User is required!'],
+      autopopulate: {
+        select: 'firstName lastName avatar',
+        maxDepth: 1,
+      },
+    },
+    attendees: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          autopopulate: {
+            select: 'firstName lastName avatar',
+            maxDepth: 1,
+          },
+        },
+      ],
+      default: [],
     },
   },
   {
@@ -39,4 +58,13 @@ const eventSchema = new mongoose.Schema<IEvent>(
   }
 );
 
-export default mongoose.model<IEvent>('Event', eventSchema);
+eventSchema.plugin(mongooseAutoPopulate);
+
+eventSchema.pre('save', function (next) {
+  if (this.startDate > this.endDate) {
+    return next(new Error('Start Date must be before End Date!'));
+  }
+  next();
+});
+
+export default mongoose.model<Event>('Event', eventSchema);

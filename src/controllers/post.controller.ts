@@ -1,8 +1,7 @@
-import { IPost } from 'types/post';
 import CrudService from '../core/CRUD';
 import schema from '../schema/post.schema';
 
-class PostController extends CrudService<IPost> {
+class PostController extends CrudService<Post> {
   constructor() {
     super(schema);
   }

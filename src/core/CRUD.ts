@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { Model, Document } from 'mongoose';
+import { Model } from 'mongoose';
 import { calculatePagination } from '../utils/pagination';
 
 interface CRUDOptions<T> {
@@ -8,7 +8,7 @@ interface CRUDOptions<T> {
   populateFields?: (keyof T)[];
 }
 
-class CrudService<T extends Document> {
+class CrudService<T extends MongoDocument> {
   protected model: Model<T>;
   protected simpleFields: (keyof T)[] = ['_id'];
   protected populateFields: (keyof T)[] = [];

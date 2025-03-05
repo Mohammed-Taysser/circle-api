@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { IRequest } from 'types/app';
+import { IRequest, JwtTokenPayload } from 'types/app';
 import schema from '../schema/user.schema';
 import { generateToken } from '../utils/jwt';
 
@@ -16,7 +16,15 @@ async function register(request: Request, response: Response) {
 
     const user = await new schema(body).save();
 
-    const token = await generateToken(user);
+    const jwtPayload: JwtTokenPayload = {
+      _id: String(user._id),
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+    };
+
+    const token = await generateToken(jwtPayload);
 
     response.status(statusCode.CREATED).json({ user, token });
   } catch (error) {

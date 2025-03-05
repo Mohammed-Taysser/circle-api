@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
-import { IBadge } from 'types/badge';
 
-const badgeSchema = new mongoose.Schema<IBadge>(
+const badgeSchema = new mongoose.Schema<Badge>(
   {
     label: {
       type: String,
@@ -9,6 +8,7 @@ const badgeSchema = new mongoose.Schema<IBadge>(
       trim: true,
       minlength: [3, 'label should be at least 3 characters!'],
       maxlength: [50, 'label should be at most 50 characters!'],
+      unique: [true, 'label must be unique!'],
     },
     body: {
       type: String,
@@ -28,4 +28,4 @@ const badgeSchema = new mongoose.Schema<IBadge>(
   }
 );
 
-export default mongoose.model<IBadge>('Badge', badgeSchema);
+export default mongoose.model<Badge>('Badge', badgeSchema);

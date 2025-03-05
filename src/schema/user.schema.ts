@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import { IUser } from 'types/user';
 import { hashPassword } from '../utils/bcrypt';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<User>(
   {
     username: {
       type: String,
@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema(
       unique: [true, 'username already exists!'],
       max: [100, 'username is too long!'],
       min: [8, 'username is too short!'],
+      index: true,
+      trim: true,
     },
     role: {
       type: String,
@@ -31,20 +33,37 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Email not provided!'],
       unique: [true, 'Email already exists!'],
       max: [100, 'Email is too long!'],
+      trim: true,
+      index: true,
     },
     password: {
       type: String,
       required: [true, 'password not provided!'],
+      select: false,
     },
     badges: [
       {
-        badge: { type: mongoose.Schema.Types.ObjectId, ref: 'Badge' },
+        badge: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Badge',
+          autopopulate: {
+            select: 'name description image',
+            maxDepth: 1,
+          },
+        },
         earnAt: { type: Date, default: new Date() },
       },
     ],
     bookmarks: [
       {
-        post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+        post: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Post',
+          autopopulate: {
+            select: 'title',
+            maxDepth: 1,
+          },
+        },
         saveAt: { type: Date, default: new Date() },
       },
     ],
@@ -62,15 +81,19 @@ const userSchema = new mongoose.Schema(
     },
     passwordResetToken: {
       type: String,
+      select: false,
     },
     passwordResetExpires: {
       type: Date,
+      select: false,
     },
   },
   {
     timestamps: true,
   }
 );
+
+userSchema.plugin(mongooseAutoPopulate);
 
 userSchema.pre('save', async function () {
   if (this.isModified('password')) {
@@ -85,4 +108,4 @@ userSchema.pre('save', async function () {
 //   next();
 // });
 
-export default mongoose.model<IUser>('User', userSchema);
+export default mongoose.model<User>('User', userSchema);

@@ -1,8 +1,7 @@
-import { ISubscription } from 'types/subscription';
 import CrudService from '../core/CRUD';
 import schema from '../schema/subscription.schema';
 
-class SubscriptionController extends CrudService<ISubscription> {
+class SubscriptionController extends CrudService<Subscription> {
   constructor() {
     super(schema);
   }

@@ -1,10 +1,5 @@
-import mongoose, { ObjectId } from 'mongoose';
-
-interface Badge {
-  _id: ObjectId;
+interface Badge extends MongoDocument {
   label: string;
   body: string;
   picture: string;
 }
-
-type IBadge = mongoose.Document & Badge;

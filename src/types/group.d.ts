@@ -1,13 +1,10 @@
-import mongoose from 'mongoose';
-
 type Visibility = 'public' | 'private';
 
-interface Group {
+interface Group extends MongoDocument {
   _id: string;
   name: string;
   visibility: Visibility;
   cover: string;
   avatar: string;
+  badges: Badge[];
 }
-
-type IGroup = mongoose.Document & Group;

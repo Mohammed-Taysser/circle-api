@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
-import { IPost } from 'types/post';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const postSchema = new Schema<IPost>(
+const postSchema = new Schema<Post>(
   {
     variant: {
       type: String,
@@ -22,6 +22,7 @@ const postSchema = new Schema<IPost>(
     visibility: {
       type: String,
       default: 'public',
+      index: true,
       enum: ['public', 'friends', 'private'],
     },
     activity: {
@@ -35,45 +36,26 @@ const postSchema = new Schema<IPost>(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-    },
-    assets: {
-      friend: {
-        type: String,
-        default: '',
-      },
-      group: {
-        type: String,
-        default: '',
-      },
-      youtube: {
-        type: String,
-        default: '',
-      },
-      cover: {
-        type: String,
-        default: '',
-      },
-      avatar: {
-        type: String,
-        default: '',
-      },
-      gallery: {
-        type: [String],
-        default: [],
-      },
-      audio: {
-        type: String,
-        default: '',
-      },
-      video: {
-        type: String,
-        default: '',
+      index: true,
+      required: [true, 'user not provided!'],
+      autopopulate: {
+        select: 'username firstName lastName avatar',
+        maxDepth: 1,
       },
     },
+    assets: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'PostAsset',
+        autopopulate: true,
+      },
+    ],
   },
   {
-    timestamps:true,
+    timestamps: true,
   }
 );
 
-export default mongoose.model<IPost>('Post', postSchema);
+postSchema.plugin(mongooseAutoPopulate);
+
+export default mongoose.model<Post>('Post', postSchema);

@@ -1,8 +1,7 @@
 import CrudService from '../core/CRUD';
-import { IEvent } from 'types/event';
 import schema from '../schema/event.schema';
 
-class EventController extends CrudService<IEvent> {
+class EventController extends CrudService<Event> {
   constructor() {
     super(schema, { simpleFields: ['title'] });
   }
