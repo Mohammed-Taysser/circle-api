@@ -1,4 +1,4 @@
-interface Event extends MongoDocument {
+interface UserEvent extends MongoDocument {
   title: string;
   body: string;
   startDate: Date;
@@ -6,4 +6,8 @@ interface Event extends MongoDocument {
   allDay: boolean;
   user: User;
   attendees: User[];
+  location: {
+    type: string;
+    coordinates: number[];
+  };
 }

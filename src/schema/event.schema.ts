@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const eventSchema = new mongoose.Schema<Event>(
+const eventSchema = new mongoose.Schema<UserEvent>(
   {
     title: {
       type: String,
@@ -52,6 +52,19 @@ const eventSchema = new mongoose.Schema<Event>(
       ],
       default: [],
     },
+    location: {
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: {
+        type: [Number],
+      },
+      formattedAddress: {
+        type: String,
+      },
+    },
   },
   {
     timestamps: true,
@@ -67,4 +80,4 @@ eventSchema.pre('save', function (next) {
   next();
 });
 
-export default mongoose.model<Event>('Event', eventSchema);
+export default mongoose.model<UserEvent>('Event', eventSchema);

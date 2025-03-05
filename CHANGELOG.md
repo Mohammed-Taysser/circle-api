@@ -18,3 +18,5 @@
 - [ ] add rate limiter
 - [ ] add socket io
 - [ ] add admin panel
+- [ ] add docs
+- [ ] add tests

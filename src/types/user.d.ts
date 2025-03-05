@@ -15,4 +15,5 @@ interface User extends MongoDocument {
   verified: boolean;
   status: 'active' | 'inactive' | 'banned';
   isVerified: boolean;
+  isDeleted: boolean;
 }

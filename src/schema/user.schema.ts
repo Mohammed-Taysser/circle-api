@@ -87,6 +87,10 @@ const userSchema = new mongoose.Schema<User>(
       type: Date,
       select: false,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
