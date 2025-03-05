@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application } from 'express';
 import rateLimiter from 'express-rate-limit';
@@ -9,8 +10,8 @@ import morgan from 'morgan';
 import config from './core/config';
 import compression from './middleware/compression';
 import routeNotFound from './middleware/routeNotFound';
-import routes from './routes';
 import serverError from './middleware/serverError';
+import routes from './routes';
 
 // Express instance
 const app: Application = express();
@@ -27,6 +28,9 @@ app.use(helmet());
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());
+
+// parse cookies
+app.use(cookieParser());
 
 // parse body params and attache them to req.body
 // parse application/x-www-form-urlencoded
