@@ -12,7 +12,7 @@ import usersRoutes from './user.route';
 const router = express.Router();
 
 router.use('/', helperRoutes);
-router.use('/subscribe', subscriptionRoutes);
+router.use('/subscription', subscriptionRoutes);
 router.use(
   '/auth',
   rateLimiter({

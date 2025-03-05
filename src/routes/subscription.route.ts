@@ -5,11 +5,13 @@ import validation from '../validation/subscription.validation';
 const router = express.Router();
 
 router.get('/', controller.getAll);
-// router.get(
-//   '/verify',
-//   validation.emailSubscriptionVerify,
-//   controller.isEmailSubscribe
-// );
-// router.post('/', validation.subscription, controller.subscribe);
+router.get('/:id', controller.getById);
+router.get(
+  '/check/:email',
+  validation.emailSubscriptionVerify,
+  controller.checkSubscription
+);
+router.post('/', validation.subscription, controller.create);
+router.delete('/:id', controller.delete);
 
 export default router;

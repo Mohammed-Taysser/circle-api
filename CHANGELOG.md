@@ -20,3 +20,5 @@
 - [ ] add admin panel
 - [ ] add docs
 - [ ] add tests
+- [ ] send email to user on account activation
+- [ ] send email on subscruption
