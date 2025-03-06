@@ -25,10 +25,6 @@ const commentSchema = new Schema<Comment>(
       ref: 'Post',
       required: [true, 'post not provided!'],
       index: true,
-      autopopulate: {
-        select: 'title',
-        maxDepth: 1,
-      },
     },
   },
   {

@@ -21,4 +21,8 @@
 - [ ] add docs
 - [ ] add tests
 - [ ] send email to user on account activation
-- [ ] send email on subscruption
+- [ ] send email on subscription
+- [ ] active "isDelete" field
+- [ ] integrate social media auth
+- [ ] add logs
+- [ ] add forget & reset password

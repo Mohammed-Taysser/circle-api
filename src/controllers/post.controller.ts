@@ -3,6 +3,7 @@ import CrudService from '../core/CRUD';
 import statusCode from 'http-status-codes';
 import schema from '../schema/post.schema';
 import postAssetsSchema from '../schema/PostAsset.schema';
+import commentSchema from '../schema/comment.schema';
 
 class PostController extends CrudService<Post> {
   constructor() {
@@ -16,11 +17,15 @@ class PostController extends CrudService<Post> {
       const post = await schema.findByIdAndDelete(itemId);
 
       if (post) {
+        // Delete assets
         await Promise.all(
           post.assets.map((asset) =>
             postAssetsSchema.findByIdAndDelete(asset._id)
           )
         );
+
+        // Delete comments
+        await commentSchema.deleteMany({ post: post._id });
 
         response.status(statusCode.OK).json({ data: post });
       } else {
