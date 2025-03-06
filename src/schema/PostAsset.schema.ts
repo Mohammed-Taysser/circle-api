@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
 const assetSchema = new Schema<PostAsset>(
   {
@@ -19,11 +20,15 @@ const assetSchema = new Schema<PostAsset>(
     url: {
       type: String, // Used for media (cover, avatar, gallery, video, audio, youtube)
       trim: true,
-      default: '',
+      default: '/cover.jpg',
     },
     refId: {
       type: Schema.Types.ObjectId, // Used for friend & group reference
       refPath: 'refModel', // Dynamic reference based on `type`
+      autopopulate: {
+        select: 'username name firstName lastName avatar',
+        maxDepth: 1,
+      },
     },
     refModel: {
       type: String,
@@ -39,5 +44,7 @@ const assetSchema = new Schema<PostAsset>(
   },
   { timestamps: true }
 );
+
+assetSchema.plugin(mongooseAutoPopulate);
 
 export default mongoose.model<PostAsset>('PostAsset', assetSchema);

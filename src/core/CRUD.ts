@@ -5,19 +5,19 @@ import { calculatePagination } from '../utils/pagination';
 
 interface CRUDOptions<T> {
   simpleFields?: (keyof T)[];
-  populateFields?: (keyof T)[];
+  paramsId?: string;
 }
 
 class CrudService<T extends MongoDocument> {
   protected model: Model<T>;
   protected simpleFields: (keyof T)[] = ['_id'];
-  protected populateFields: (keyof T)[] = [];
+  protected paramsId = 'id';
 
   constructor(model: Model<T>, options?: CRUDOptions<T>) {
-    const { simpleFields = [], populateFields = [] } = options || {};
+    const { simpleFields = [] } = options || {};
 
     this.simpleFields = simpleFields;
-    this.populateFields = populateFields;
+    this.paramsId = options?.paramsId ?? this.paramsId;
 
     this.model = model;
 
@@ -46,7 +46,6 @@ class CrudService<T extends MongoDocument> {
       .find({}, projection)
       .skip(pagination.skip)
       .limit(pagination.limit)
-      .populate(this.populateFields as string[])
       .then((items) => {
         response
           .status(statusCode.OK)
@@ -58,11 +57,10 @@ class CrudService<T extends MongoDocument> {
   }
 
   async getById(request: Request, response: Response) {
-    const { id } = request.params;
+    const itemId = request.params[this.paramsId];
 
     await this.model
-      .findById(id)
-      .populate(this.populateFields as string[])
+      .findById(itemId)
       .then((item) => {
         if (item) {
           response.status(statusCode.OK).json({ data: item });
@@ -89,10 +87,13 @@ class CrudService<T extends MongoDocument> {
   }
 
   async update(request: Request, response: Response) {
-    const { id } = request.params;
+    const itemId = request.params[this.paramsId];
 
     await this.model
-      .findByIdAndUpdate(id, request.body, { runValidators: true, new: true })
+      .findByIdAndUpdate(itemId, request.body, {
+        runValidators: true,
+        new: true,
+      })
       .then((item) => {
         if (item) {
           response.status(statusCode.OK).json({ data: item });
@@ -108,10 +109,10 @@ class CrudService<T extends MongoDocument> {
   }
 
   async delete(request: Request, response: Response) {
-    const { id } = request.params;
+    const itemId = request.params[this.paramsId];
 
     await this.model
-      .findByIdAndDelete(id)
+      .findByIdAndDelete(itemId)
       .then((item) => {
         if (item) {
           response.status(statusCode.OK).json({ data: item });

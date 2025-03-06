@@ -43,13 +43,16 @@ const postSchema = new Schema<Post>(
         maxDepth: 1,
       },
     },
-    assets: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'PostAsset',
-        autopopulate: true,
-      },
-    ],
+    assets: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'PostAsset',
+          autopopulate: true,
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,

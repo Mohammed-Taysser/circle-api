@@ -3,7 +3,7 @@ import schema from '../schema/post.schema';
 
 class PostController extends CrudService<Post> {
   constructor() {
-    super(schema);
+    super(schema, { paramsId: 'postId' });
   }
 }
 

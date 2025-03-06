@@ -41,7 +41,7 @@ const login = [
 
     const { email, password } = request.body;
 
-    const user = await schema.findOne({ email });
+    const user = await schema.findOne({ email }).select('+password');
 
     if (!user) {
       return response.status(statusCode.BAD_REQUEST).json({

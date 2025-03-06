@@ -12,7 +12,6 @@ interface User extends MongoDocument {
   passwordChangeAt: Date;
   passwordResetToken: string;
   passwordResetExpires: Date;
-  verified: boolean;
   status: 'active' | 'inactive' | 'banned';
   isVerified: boolean;
   isDeleted: boolean;

@@ -30,7 +30,7 @@ const authorization = async (
           .json({ error: "you aren't authorize, your account is inactive" });
       }
 
-      if (!userDB.verified) {
+      if (!userDB.isVerified) {
         return response.status(statusCode.FORBIDDEN).json({
           error: "you aren't authorize, your account is not verified",
         });

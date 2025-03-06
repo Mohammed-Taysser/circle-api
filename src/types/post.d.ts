@@ -30,7 +30,7 @@ interface Post extends MongoDocument {
   visibility: Visibility;
   variant: Variant;
   user: User;
-  assets: Assets;
+  assets: PostAsset[];
   activity?: string;
   body: string;
   comments: number;
