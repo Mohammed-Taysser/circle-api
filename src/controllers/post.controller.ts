@@ -1,9 +1,34 @@
+import { Request, Response } from 'express';
 import CrudService from '../core/CRUD';
+import statusCode from 'http-status-codes';
 import schema from '../schema/post.schema';
+import postAssetsSchema from '../schema/PostAsset.schema';
 
 class PostController extends CrudService<Post> {
   constructor() {
     super(schema, { paramsId: 'postId' });
+  }
+
+  async delete(request: Request, response: Response) {
+    const itemId = request.params[this.paramsId];
+
+    try {
+      const post = await schema.findByIdAndDelete(itemId);
+
+      if (post) {
+        await Promise.all(
+          post.assets.map((asset) =>
+            postAssetsSchema.findByIdAndDelete(asset._id)
+          )
+        );
+
+        response.status(statusCode.OK).json({ data: post });
+      } else {
+        response.status(statusCode.NOT_FOUND).json({ error: 'Item not found' });
+      }
+    } catch (error) {
+      response.status(statusCode.BAD_REQUEST).json({ error });
+    }
   }
 }
 

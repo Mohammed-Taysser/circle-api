@@ -51,4 +51,10 @@ async function refreshToken(request: Request, response: Response) {
   response.status(statusCode.OK).json({ token });
 }
 
-export default { login, register, refreshToken };
+async function me(request: Request, response: Response) {
+  const { user } = request as IRequest;
+
+  response.status(statusCode.OK).json({ data: user });
+}
+
+export default { login, register, refreshToken, me };
