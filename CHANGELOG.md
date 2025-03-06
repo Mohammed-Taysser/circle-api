@@ -26,3 +26,4 @@
 - [ ] integrate social media auth
 - [ ] add logs
 - [ ] add forget & reset password
+- [ ] add dashboard staatus

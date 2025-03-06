@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const commentSchema = new Schema<Comment>(
+const commentSchema = new Schema<UserComment>(
   {
     body: {
       type: String,
@@ -34,4 +34,4 @@ const commentSchema = new Schema<Comment>(
 
 commentSchema.plugin(mongooseAutoPopulate);
 
-export default model<Comment>('Comment', commentSchema);
+export default model<UserComment>('Comment', commentSchema);

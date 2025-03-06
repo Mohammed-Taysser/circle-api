@@ -1,7 +1,5 @@
 type Visibility = 'public' | 'friends' | 'private';
 
-type Reactions = 'like' | 'love' | 'star' | 'wow';
-
 type Variant =
   | 'cover'
   | 'avatar'
@@ -13,18 +11,6 @@ type Variant =
   | 'group'
   | 'friend'
   | 'share';
-
-interface Comment extends MongoDocument {
-  body: string;
-  user: User;
-  post: Post;
-}
-
-interface Reaction extends MongoDocument {
-  react: Reactions;
-  post: Post;
-  user: User;
-}
 
 interface Post extends MongoDocument {
   visibility: Visibility;

@@ -5,7 +5,7 @@ import commentSchema from '../schema/comment.schema';
 import postSchema from '../schema/post.schema';
 import { calculatePagination } from '../utils/pagination';
 
-class CommentController extends CrudService<Comment> {
+class CommentController extends CrudService<UserComment> {
   constructor() {
     super(commentSchema, { paramsId: 'commentId' });
   }
