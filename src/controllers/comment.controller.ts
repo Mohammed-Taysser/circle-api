@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import CrudService from '../core/CRUD';
-import commentSchema from '../schema/comment.schema';
-import postSchema from '../schema/post.schema';
+import postSchema from '../schema/post/post.schema';
+import commentSchema from '../schema/post/comment.schema';
 import { calculatePagination } from '../utils/pagination';
 
 class CommentController extends CrudService<UserComment> {

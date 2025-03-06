@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const assetSchema = new Schema<PostAsset>(
+const postAssetSchema = new Schema<PostAsset>(
   {
     type: {
       type: String,
@@ -45,6 +45,6 @@ const assetSchema = new Schema<PostAsset>(
   { timestamps: true }
 );
 
-assetSchema.plugin(mongooseAutoPopulate);
+postAssetSchema.plugin(mongooseAutoPopulate);
 
-export default mongoose.model<PostAsset>('PostAsset', assetSchema);
+export default mongoose.model<PostAsset>('PostAsset', postAssetSchema);

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import CrudService from '../core/CRUD';
 import statusCode from 'http-status-codes';
-import schema from '../schema/post.schema';
-import postAssetsSchema from '../schema/PostAsset.schema';
-import commentSchema from '../schema/comment.schema';
+import CrudService from '../core/CRUD';
+import postAssetsSchema from '../schema/post/post-asset.schema';
+import schema from '../schema/post/post.schema';
+import commentSchema from '../schema/post/comment.schema';
 
 class PostController extends CrudService<Post> {
   constructor() {
