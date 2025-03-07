@@ -1,7 +1,7 @@
 import express from 'express';
-import controller from '../controllers/post.controller';
-import authorization from '../middleware/authorization';
-import validation from '../validation/post.validation';
+import controller from '../../controllers/post/post.controller';
+import authorization from '../../middleware/authorization';
+import validation from '../../validation/post.validation';
 import commentRouter from './comment.route';
 import postAssetsRouters from './post-assets.route';
 

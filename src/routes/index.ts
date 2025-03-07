@@ -2,10 +2,10 @@ import express from 'express';
 import rateLimiter from 'express-rate-limit';
 import authRoutes from './auth.route';
 import badgesRoutes from './badge.route';
-import eventsRoutes from './event.route';
+import eventsRoutes from './event/event.route';
 import groupsRoutes from './group.route';
 import helperRoutes from './helper.route';
-import postsRoutes from './posts.route';
+import postsRoutes from './post/posts.route';
 import subscriptionRoutes from './subscription.route';
 import usersRoutes from './user.route';
 

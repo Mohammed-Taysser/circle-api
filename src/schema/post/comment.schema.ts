@@ -8,7 +8,6 @@ const commentSchema = new Schema<UserComment>(
       trim: true,
       required: [true, "comment can't be empty!"],
       minlength: [1, 'comment is too short!'],
-      maxlength: [500, 'comment is too long!'],
     },
     user: {
       type: Schema.Types.ObjectId,

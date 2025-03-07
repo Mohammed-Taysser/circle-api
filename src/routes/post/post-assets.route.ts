@@ -1,6 +1,6 @@
 import express from 'express';
-import controller from '../controllers/post-assets.controller';
-import authorization from '../middleware/authorization';
+import controller from '../../controllers/post/post-assets.controller';
+import authorization from '../../middleware/authorization';
 
 const router = express.Router({ mergeParams: true });
 

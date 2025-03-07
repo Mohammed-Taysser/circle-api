@@ -14,7 +14,6 @@ const groupSchema = new mongoose.Schema<Group>(
       required: [true, 'name not provided!'],
       trim: true,
       minlength: [2, 'name too short!'],
-      maxlength: [50, 'name too long!'],
       unique: [true, 'name must be unique!'],
       index: true,
     },

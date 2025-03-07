@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import CrudService from '../core/CRUD';
-import postAssetsSchema from '../schema/post/post-asset.schema';
-import postSchema from '../schema/post/post.schema';
+import CrudService from '../../core/CRUD';
+import postAssetsSchema from '../../schema/post/post-asset.schema';
+import postSchema from '../../schema/post/post.schema';
 
 class PostAssetController extends CrudService<PostAsset> {
   constructor() {

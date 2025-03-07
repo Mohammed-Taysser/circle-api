@@ -8,13 +8,11 @@ const eventSchema = new mongoose.Schema<UserEvent>(
       required: [true, 'Title is required!'],
       trim: true,
       minlength: [3, 'Title should be at least 3 characters!'],
-      maxlength: [100, 'Title should be at most 100 characters!'],
     },
     body: {
       type: String,
       default: '',
       trim: true,
-      maxlength: [5000, 'Body should be at most 5000 characters!'],
     },
     startDate: {
       index: true,
@@ -51,6 +49,12 @@ const eventSchema = new mongoose.Schema<UserEvent>(
         },
       ],
       default: [],
+      // validate: {
+      //   validator(v: any) {
+      //     return new Set(v).size === v.length;
+      //   },
+      //   message: '{VALUE} contains duplicate attendees!',
+      // },
     },
     location: {
       type: {
@@ -65,6 +69,26 @@ const eventSchema = new mongoose.Schema<UserEvent>(
         type: String,
       },
     },
+    type: {
+      type: String,
+      default: 'event',
+      enum: ['event', 'birthday', 'anniversary', 'other'],
+    },
+    color: {
+      type: String,
+      default: '#000000',
+    },
+    rate: {
+      type: Number,
+      default: 0,
+      min: [0, 'Rating must be at least 0'],
+      max: [5, 'Rating must be at most 5'],
+      set: (value: number) => value.toFixed(2),
+    },
+    rateCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
@@ -77,6 +101,7 @@ eventSchema.pre('save', function (next) {
   if (this.startDate > this.endDate) {
     return next(new Error('Start Date must be before End Date!'));
   }
+
   next();
 });
 

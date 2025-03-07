@@ -9,5 +9,10 @@ interface UserEvent extends MongoDocument {
   location: {
     type: string;
     coordinates: number[];
+    formattedAddress: string;
   };
+  type: 'event' | 'birthday' | 'anniversary' | 'other';
+  color: string;
+  rate: number;
+  rateCount: number;
 }
