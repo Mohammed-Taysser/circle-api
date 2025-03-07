@@ -22,7 +22,6 @@ const postSchema = new Schema<Post>(
     visibility: {
       type: String,
       default: 'public',
-      index: true,
       enum: ['public', 'friends', 'private'],
     },
     activity: {
@@ -36,7 +35,6 @@ const postSchema = new Schema<Post>(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      index: true,
       required: [true, 'user not provided!'],
       autopopulate: {
         select: 'username firstName lastName avatar',
@@ -60,5 +58,9 @@ const postSchema = new Schema<Post>(
 );
 
 postSchema.plugin(mongooseAutoPopulate);
+
+postSchema.index({ user: 1 });
+postSchema.index({ variant: 1 });
+postSchema.index({ visibility: 1 });
 
 export default mongoose.model<Post>('Post', postSchema);

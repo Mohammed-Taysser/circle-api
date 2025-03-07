@@ -15,7 +15,6 @@ const eventSchema = new mongoose.Schema<UserEvent>(
       trim: true,
     },
     startDate: {
-      index: true,
       type: Date,
       required: [true, 'Start Date is required!'],
     },
@@ -30,7 +29,6 @@ const eventSchema = new mongoose.Schema<UserEvent>(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      index: true,
       required: [true, 'User is required!'],
       autopopulate: {
         select: 'firstName lastName avatar',
@@ -64,10 +62,11 @@ const eventSchema = new mongoose.Schema<UserEvent>(
       },
       coordinates: {
         type: [Number],
+        required: [true, 'Location is required!'],
       },
-      formattedAddress: {
-        type: String,
-      },
+    },
+    formattedAddress: {
+      type: String,
     },
     type: {
       type: String,
@@ -96,6 +95,11 @@ const eventSchema = new mongoose.Schema<UserEvent>(
 );
 
 eventSchema.plugin(mongooseAutoPopulate);
+
+eventSchema.index({ location: '2dsphere' });
+eventSchema.index({ startDate: 1 });
+eventSchema.index({ endDate: 1 });
+eventSchema.index({ user: 1 });
 
 eventSchema.pre('save', function (next) {
   if (this.startDate > this.endDate) {

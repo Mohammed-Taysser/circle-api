@@ -7,6 +7,8 @@ import reviewRoute from './review.route';
 const router = express.Router();
 
 router.get('/', controller.getAll);
+router.get('/events-nearby', controller.getEventsNearby);
+router.get('/distance-to-event', controller.distanceToEventByPoint);
 router.get('/:eventId', controller.getById);
 router.post('/', authorization, validation.create, controller.create);
 router.patch('/:eventId', authorization, validation.update, controller.update);

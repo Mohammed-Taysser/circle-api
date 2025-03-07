@@ -6,7 +6,6 @@ const groupSchema = new mongoose.Schema<Group>(
     visibility: {
       type: String,
       default: 'public',
-      index: true,
       enum: ['public', 'private', 'friends'],
     },
     name: {
@@ -15,7 +14,6 @@ const groupSchema = new mongoose.Schema<Group>(
       trim: true,
       minlength: [2, 'name too short!'],
       unique: [true, 'name must be unique!'],
-      index: true,
     },
     avatar: {
       type: String,
@@ -50,5 +48,8 @@ const groupSchema = new mongoose.Schema<Group>(
 );
 
 groupSchema.plugin(mongooseAutoPopulate);
+
+groupSchema.index({ name: 1 });
+groupSchema.index({ visibility: 1 });
 
 export default mongoose.model<Group>('Group', groupSchema);

@@ -18,7 +18,6 @@ const reviewSchema = new mongoose.Schema<Review>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'user not provided!'],
-      index: true,
       autopopulate: {
         select: 'username firstName lastName avatar',
         maxDepth: 1,
@@ -28,7 +27,6 @@ const reviewSchema = new mongoose.Schema<Review>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Event',
       required: [true, 'event not provided!'],
-      index: true,
     },
     rate: {
       type: Number,
@@ -44,6 +42,8 @@ const reviewSchema = new mongoose.Schema<Review>(
 
 reviewSchema.plugin(mongooseAutoPopulate);
 
+reviewSchema.index({ rate: 1 });
+reviewSchema.index({ event: 1 });
 reviewSchema.index({ event: 1, user: 1 }, { unique: true });
 
 reviewSchema.static('calculateAverageRating', async function (eventId: string) {

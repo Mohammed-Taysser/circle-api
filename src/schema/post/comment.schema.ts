@@ -13,7 +13,6 @@ const commentSchema = new Schema<UserComment>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'user not provided!'],
-      index: true,
       autopopulate: {
         select: 'username firstName lastName avatar',
         maxDepth: 1,
@@ -23,7 +22,6 @@ const commentSchema = new Schema<UserComment>(
       type: Schema.Types.ObjectId,
       ref: 'Post',
       required: [true, 'post not provided!'],
-      index: true,
     },
   },
   {
@@ -32,5 +30,8 @@ const commentSchema = new Schema<UserComment>(
 );
 
 commentSchema.plugin(mongooseAutoPopulate);
+
+commentSchema.index({ post: 1 });
+commentSchema.index({ user: 1 });
 
 export default model<UserComment>('Comment', commentSchema);

@@ -63,8 +63,6 @@ app.use(express.static('public'));
 mongoose
   .connect(config.server.mongoUrl)
   .then(() => {
-    console.log('⚡ DB Connection: OK');
-
     app.listen(config.server.port, () => {
       console.log(`🚀 API Server listening on port ${config.server.port}`);
 

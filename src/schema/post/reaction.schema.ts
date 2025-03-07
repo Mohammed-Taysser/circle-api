@@ -5,14 +5,12 @@ const reactionSchema = new Schema<Reaction>(
   {
     react: {
       type: String,
-      index: true,
       default: 'like',
       enum: ['like', 'love', 'star', 'wow'],
     },
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      index: true,
       autopopulate: {
         select: 'username firstName lastName avatar',
         maxDepth: 1,
@@ -22,7 +20,6 @@ const reactionSchema = new Schema<Reaction>(
     post: {
       type: Schema.Types.ObjectId,
       ref: 'Post',
-      index: true,
       autopopulate: {
         select: 'title',
         maxDepth: 1,
@@ -36,5 +33,9 @@ const reactionSchema = new Schema<Reaction>(
 );
 
 reactionSchema.plugin(mongooseAutoPopulate);
+
+reactionSchema.index({ post: 1 });
+reactionSchema.index({ react: 1 });
+reactionSchema.index({ user: 1 });
 
 export default model<Reaction>('Reactions', reactionSchema);
