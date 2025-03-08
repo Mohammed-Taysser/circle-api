@@ -26,26 +26,18 @@ class PostAssetController extends CrudService<PostAsset> {
   }
 
   async getById(request: Request, response: Response) {
-    const { postId, assetId } = request.params;
+    const { postId } = request.params;
 
     try {
       const post = await postSchema.findById(postId);
 
       if (!post) {
-        response.status(statusCode.NOT_FOUND).json({ error: 'Post not found' });
-      } else {
-        const assetItem = post.assets.find(
-          (item) => item._id.toString() === assetId
-        );
-
-        if (!assetItem) {
-          response
-            .status(statusCode.NOT_FOUND)
-            .json({ error: 'Asset not found' });
-        } else {
-          response.status(statusCode.OK).json({ data: assetItem });
-        }
+        return response
+          .status(statusCode.NOT_FOUND)
+          .json({ error: 'Post not found' });
       }
+
+      super.getById(request, response);
     } catch (error) {
       response.status(statusCode.BAD_REQUEST).json({ error });
     }
@@ -74,32 +66,18 @@ class PostAssetController extends CrudService<PostAsset> {
   }
 
   async delete(request: Request, response: Response) {
-    const { postId, assetId } = request.params;
+    const { postId } = request.params;
 
     try {
       const post = await postSchema.findById(postId);
 
       if (!post) {
-        response.status(statusCode.NOT_FOUND).json({ error: 'Post not found' });
-      } else {
-        const assetItem = post.assets.find(
-          (item) => item._id.toString() === assetId
-        );
-
-        if (!assetItem) {
-          response
-            .status(statusCode.NOT_FOUND)
-            .json({ error: 'Asset not found' });
-        } else {
-          await this.model.findByIdAndDelete(assetId);
-
-          await postSchema.findByIdAndUpdate(postId, {
-            $pull: { assets: assetId },
-          });
-
-          response.status(statusCode.OK).json({ data: assetItem });
-        }
+        return response
+          .status(statusCode.NOT_FOUND)
+          .json({ error: 'Post not found' });
       }
+
+      super.delete(request, response);
     } catch (error) {
       response.status(statusCode.BAD_REQUEST).json({ error });
     }

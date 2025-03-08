@@ -1,37 +1,31 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import CrudService from '../../core/CRUD';
-import postSchema from '../../schema/post/post.schema';
 import commentSchema from '../../schema/post/comment.schema';
-import { calculatePagination } from '../../utils/pagination';
+import postSchema from '../../schema/post/post.schema';
+import { FilterRequest } from 'types/app';
 
 class CommentController extends CrudService<UserComment> {
   constructor() {
     super(commentSchema, { paramsId: 'commentId' });
   }
 
-  async getAll(request: Request, response: Response) {
+  async getAll(req: Request, response: Response) {
+    const request = req as FilterRequest<UserComment>;
     const { postId } = request.params;
-
-    const total = await this.model.countDocuments();
-
-    const pagination = calculatePagination(request);
 
     try {
       const post = await postSchema.findById(postId);
 
       if (!post) {
-        response.status(statusCode.NOT_FOUND).json({ error: 'Post not found' });
-      } else {
-        const comments = await this.model
-          .find({ post: post._id })
-          .skip(pagination.skip)
-          .limit(pagination.limit);
-
-        response
-          .status(statusCode.OK)
-          .json({ meta: { ...pagination, total }, data: comments });
+        return response
+          .status(statusCode.NOT_FOUND)
+          .json({ error: 'Post not found' });
       }
+
+      request.filters = { post: postId };
+
+      super.getAll(request, response);
     } catch (error) {
       response.status(statusCode.BAD_REQUEST).json({ error });
     }
@@ -44,16 +38,19 @@ class CommentController extends CrudService<UserComment> {
       const post = await postSchema.findById(postId);
 
       if (!post) {
-        response.status(statusCode.NOT_FOUND).json({ error: 'Post not found' });
-      } else {
-        const body = {
-          ...request.body,
-          post: postId,
-        };
-        const comment = await new this.model(body).save();
-
-        response.status(statusCode.CREATED).json({ data: comment });
+        return response
+          .status(statusCode.NOT_FOUND)
+          .json({ error: 'Post not found' });
       }
+
+      const body = {
+        ...request.body,
+        post: postId,
+      };
+
+      request.body = body;
+
+      super.create(request, response);
     } catch (error) {
       response.status(statusCode.BAD_REQUEST).json({ error });
     }

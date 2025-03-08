@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { IRequest, JwtTokenPayload } from 'types/app';
+import { AuthenticatedRequest, JwtTokenPayload } from 'types/app';
 import schema from '../schema/user.schema';
 import { generateToken } from '../utils/jwt';
 
@@ -33,7 +33,7 @@ async function register(request: Request, response: Response) {
 }
 
 async function login(request: Request, response: Response) {
-  const { user } = request as IRequest;
+  const { user } = request as AuthenticatedRequest;
 
   const token = await generateToken(user);
 
@@ -44,7 +44,7 @@ async function login(request: Request, response: Response) {
 }
 
 async function refreshToken(request: Request, response: Response) {
-  const { user } = request as IRequest;
+  const { user } = request as AuthenticatedRequest;
 
   const token = await generateToken(user);
 
@@ -52,7 +52,7 @@ async function refreshToken(request: Request, response: Response) {
 }
 
 async function me(request: Request, response: Response) {
-  const { user } = request as IRequest;
+  const { user } = request as AuthenticatedRequest;
 
   response.status(statusCode.OK).json({ data: user });
 }

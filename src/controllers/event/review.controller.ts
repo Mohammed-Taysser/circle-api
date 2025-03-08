@@ -3,37 +3,24 @@ import statusCode from 'http-status-codes';
 import CrudService from '../../core/CRUD';
 import eventSchema from '../../schema/event/event.schema';
 import reviewSchema from '../../schema/event/review.schema';
-import { IRequest } from '../../types/app';
-import { calculatePagination } from '../../utils/pagination';
+import { AuthenticatedRequest, FilterRequest } from '../../types/app';
 
 class ReviewController extends CrudService<Review> {
   constructor() {
     super(reviewSchema, { paramsId: 'reviewId' });
   }
 
-  async getAll(request: Request, response: Response) {
+  async getAll(req: Request, response: Response) {
+    const request = req as FilterRequest<Review>;
     const { eventId } = request.params;
 
-    const total = await this.model.countDocuments();
+    request.filters = { event: eventId };
 
-    const pagination = calculatePagination(request);
-
-    try {
-      const reviews = await reviewSchema
-        .find({ event: eventId })
-        .skip(pagination.skip)
-        .limit(pagination.limit);
-
-      response
-        .status(statusCode.OK)
-        .json({ meta: { ...pagination, total }, data: reviews });
-    } catch (error) {
-      response.status(statusCode.BAD_REQUEST).json({ error });
-    }
+    super.getAll(request, response);
   }
 
   async create(req: Request, response: Response) {
-    const request = req as IRequest;
+    const request = req as AuthenticatedRequest;
 
     const { eventId } = request.params;
 
@@ -41,29 +28,30 @@ class ReviewController extends CrudService<Review> {
       const event = await eventSchema.findById(eventId);
 
       if (!event) {
-        response
+        return response
           .status(statusCode.NOT_FOUND)
           .json({ error: 'Event not found' });
-      } else {
-        const existingReview = await this.model.findOne({
-          event: eventId,
-          user: request.user._id,
-        });
-
-        if (existingReview) {
-          response
-            .status(statusCode.BAD_REQUEST)
-            .json({ error: 'You have already reviewed this event' });
-        } else {
-          const body = {
-            ...request.body,
-            event: eventId,
-          };
-          const review = await new this.model(body).save();
-
-          response.status(statusCode.CREATED).json({ data: review });
-        }
       }
+
+      const existingReview = await this.model.findOne({
+        event: eventId,
+        user: request.user._id,
+      });
+
+      if (existingReview) {
+        return response
+          .status(statusCode.BAD_REQUEST)
+          .json({ error: 'You have already reviewed this event' });
+      }
+
+      const body = {
+        ...request.body,
+        event: eventId,
+      };
+
+      request.body = body;
+
+      super.create(request, response);
     } catch (error) {
       response.status(statusCode.BAD_REQUEST).json({ error });
     }

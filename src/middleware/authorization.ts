@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { IRequest } from 'types/app';
+import { AuthenticatedRequest } from 'types/app';
 import schema from '../schema/user.schema';
 import { verifyToken } from '../utils/jwt';
 
@@ -9,7 +9,7 @@ const authorization = async (
   response: Response,
   next: NextFunction
 ) => {
-  const request = req as IRequest;
+  const request = req as AuthenticatedRequest;
   const token = request.headers['authorization'];
 
   if (token?.startsWith('Bearer')) {
@@ -42,7 +42,8 @@ const authorization = async (
           .json({ error: "you aren't authorize, please change your password" });
       }
 
-      request.user = userDB;
+      const { password, ...restUserInfo } = userDB;
+      request.user = restUserInfo;
 
       next();
     } catch (_error) {

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import statusCode from 'http-status-codes';
-import { IRequest } from 'types/app';
+import { AuthenticatedRequest } from 'types/app';
 import schema from '../schema/user.schema';
 import { comparePassword } from '../utils/bcrypt';
 
@@ -12,11 +12,6 @@ const login = [
     .bail()
     .trim()
     .escape()
-    .isLength({ min: 8 })
-    .withMessage('Minimum 8 characters required!')
-    .bail()
-    .isStrongPassword()
-    .withMessage('Please provide strong password!')
     .bail(),
   check('email')
     .notEmpty()
@@ -29,7 +24,7 @@ const login = [
     .withMessage('Invalid email address!')
     .bail(),
   async (req: Request, response: Response, next: NextFunction) => {
-    const request = req as IRequest;
+    const request = req as AuthenticatedRequest;
 
     const errors = validationResult(request);
 
@@ -176,35 +171,8 @@ const forgotPassword = [
     .bail(),
 ];
 
-const resetPassword = [
-  check('email')
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .trim()
-    .normalizeEmail()
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail()
-    .custom(async (email) => {
-      await schema
-        .findOne({ email })
-        .then((user) => {
-          if (!user) {
-            return Promise.reject('Email not exist');
-          }
-
-          return null;
-        })
-        .catch((error) => Promise.reject(error));
-    })
-    .bail(),
-];
-
 export default {
   login,
   register,
   forgotPassword,
-  resetPassword,
 };

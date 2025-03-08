@@ -12,12 +12,17 @@ import compression from './middleware/compression';
 import routeNotFound from './middleware/routeNotFound';
 import serverError from './middleware/serverError';
 import routes from './routes';
+import path from 'path';
 
 // Express instance
 const app: Application = express();
 
 app.enable('verbose errors');
 app.use(morgan('dev'));
+
+// Template Engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'templates'));
 
 // ------------
 // Middleware |

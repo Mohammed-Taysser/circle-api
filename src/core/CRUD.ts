@@ -1,23 +1,33 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import { Model } from 'mongoose';
+import { FilterRequest } from '../types/app';
 import { calculatePagination } from '../utils/pagination';
 
 interface CRUDOptions<T> {
-  simpleFields?: (keyof T)[];
-  paramsId?: string;
+  simpleFields?: (keyof T)[]; // getAll: Fields that can be returned in simple mode
+  paramsId?: string; // getById: Id param name in url
+  whitelistFields?: (keyof T)[]; // update: Fields that can be updated
 }
 
 class CrudService<T extends MongoDocument> {
   protected model: Model<T>;
   protected simpleFields: (keyof T)[] = ['_id'];
+  protected whitelistFields: (keyof T)[] = [];
   protected paramsId = 'id';
 
   constructor(model: Model<T>, options?: CRUDOptions<T>) {
-    const { simpleFields = [] } = options || {};
+    if (options?.paramsId) {
+      this.paramsId = options.paramsId;
+    }
 
-    this.simpleFields = simpleFields;
-    this.paramsId = options?.paramsId ?? this.paramsId;
+    if (options?.whitelistFields) {
+      this.whitelistFields = options.whitelistFields;
+    }
+
+    if (options?.simpleFields) {
+      this.simpleFields = this.simpleFields.concat(options.simpleFields);
+    }
 
     this.model = model;
 
@@ -26,14 +36,20 @@ class CrudService<T extends MongoDocument> {
     this.create = this.create.bind(this);
     this.update = this.update.bind(this);
     this.delete = this.delete.bind(this);
+    this.softDelete = this.softDelete.bind(this);
   }
 
-  async getAll(request: Request, response: Response) {
+  async getAll(req: Request, response: Response): Promise<void | Response> {
+    const request = req as FilterRequest<T>;
+
+    const filters = request.filters;
+    console.log(filters);
+
     const pagination = calculatePagination(request);
 
     const isSimple = request.query.simple === 'true';
 
-    const total = await this.model.countDocuments();
+    const total = await this.model.countDocuments(filters);
 
     const projection = isSimple
       ? this.simpleFields.reduce(
@@ -43,7 +59,7 @@ class CrudService<T extends MongoDocument> {
       : {};
 
     await this.model
-      .find({}, projection)
+      .find(filters, projection)
       .skip(pagination.skip)
       .limit(pagination.limit)
       .then((items) => {
@@ -56,11 +72,28 @@ class CrudService<T extends MongoDocument> {
       });
   }
 
-  async getById(request: Request, response: Response) {
+  async getById(
+    request: Request,
+    response: Response
+  ): Promise<void | Response> {
     const itemId = request.params[this.paramsId];
+    let fieldsToSelect: (keyof T)[] = [];
+
+    if (request.query.fields && typeof request.query.fields === 'string') {
+      const splittedFields = request.query.fields
+        .split(',')
+        .map((field) => field.trim()) as (keyof T)[];
+
+      fieldsToSelect = splittedFields;
+    } else if (request.query.fields) {
+      return response
+        .status(statusCode.BAD_REQUEST)
+        .json({ error: 'fields querystring is not a string' });
+    }
 
     await this.model
       .findById(itemId)
+      .select(fieldsToSelect.join(' '))
       .then((item) => {
         if (item) {
           response.status(statusCode.OK).json({ data: item });
@@ -75,7 +108,7 @@ class CrudService<T extends MongoDocument> {
       });
   }
 
-  async create(request: Request, response: Response) {
+  async create(request: Request, response: Response): Promise<void | Response> {
     await new this.model(request.body)
       .save()
       .then((item) => {
@@ -86,8 +119,36 @@ class CrudService<T extends MongoDocument> {
       });
   }
 
-  async update(request: Request, response: Response) {
+  async update(request: Request, response: Response): Promise<void | Response> {
     const itemId = request.params[this.paramsId];
+
+    if (Object.keys(request.body).length === 0) {
+      return response
+        .status(statusCode.BAD_REQUEST)
+        .json({ error: 'No data provided' });
+    }
+
+    const disallowedFields = Object.keys(request.body).filter(
+      (field) => !this.whitelistFields.includes(field as keyof T)
+    );
+
+    if (disallowedFields.length > 0) {
+      return response.status(statusCode.BAD_REQUEST).json({
+        error: `The following fields are not allowed to be updated: ${disallowedFields.join(', ')}`,
+      });
+    }
+
+    const updateData = Object.fromEntries(
+      Object.entries(request.body).filter(([key]) =>
+        this.whitelistFields.includes(key as keyof T)
+      )
+    );
+
+    if (Object.keys(updateData).length === 0) {
+      return response
+        .status(statusCode.BAD_REQUEST)
+        .json({ error: 'No valid fields provided' });
+    }
 
     await this.model
       .findByIdAndUpdate(itemId, request.body, {
@@ -108,11 +169,37 @@ class CrudService<T extends MongoDocument> {
       });
   }
 
-  async delete(request: Request, response: Response) {
+  async delete(request: Request, response: Response): Promise<void | Response> {
     const itemId = request.params[this.paramsId];
 
     await this.model
       .findByIdAndDelete(itemId)
+      .then((item) => {
+        if (item) {
+          response.status(statusCode.OK).json({ data: item });
+        } else {
+          response
+            .status(statusCode.NOT_FOUND)
+            .json({ error: 'Item not found' });
+        }
+      })
+      .catch((error) => {
+        response.status(statusCode.BAD_REQUEST).json({ error });
+      });
+  }
+
+  async softDelete(
+    request: Request,
+    response: Response
+  ): Promise<void | Response> {
+    const itemId = request.params[this.paramsId];
+
+    await this.model
+      .findByIdAndUpdate(
+        itemId,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true }
+      )
       .then((item) => {
         if (item) {
           response.status(statusCode.OK).json({ data: item });

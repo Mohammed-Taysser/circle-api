@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import statusCode from 'http-status-codes';
-import { IRequest } from 'types/app';
+import { AuthenticatedRequest } from 'types/app';
 
 const adminRole = async (
   req: Request,
   response: Response,
   next: NextFunction
 ) => {
-  const request = req as IRequest;
+  const request = req as AuthenticatedRequest;
 
   // user role admin
   if (request.user.role === 'admin') {

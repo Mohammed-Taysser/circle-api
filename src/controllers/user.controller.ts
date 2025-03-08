@@ -1,9 +1,37 @@
+import { Request, Response } from 'express';
 import CrudService from '../core/CRUD';
 import schema from '../schema/user.schema';
+import { AuthenticatedRequest } from '../types/app';
 
 class UserController extends CrudService<User> {
   constructor() {
-    super(schema);
+    super(schema, {
+      whitelistFields: [
+        'username',
+        'firstName',
+        'lastName',
+        'avatar',
+        'cover',
+        'status',
+        'badges',
+        'bookmarks',
+      ],
+    });
+
+    this.resetPassword = this.resetPassword.bind(this);
+  }
+
+  async resetPassword(req: Request, response: Response) {
+    const request = req as AuthenticatedRequest;
+
+    const body = {
+      password: request.body.password,
+    };
+
+    request.params[this.paramsId] = request.body.id;
+    request.body = body;
+
+    super.update(request, response);
   }
 }
 

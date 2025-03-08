@@ -101,6 +101,8 @@ userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
 
 userSchema.pre('save', async function () {
+  console.log(this);
+
   if (this.isModified('password')) {
     this.password = await hashPassword(this.password);
     this.passwordChangeAt = new Date();

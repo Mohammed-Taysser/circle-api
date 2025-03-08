@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import statusCode from 'http-status-codes';
 import CrudService from '../../core/CRUD';
+import commentSchema from '../../schema/post/comment.schema';
 import postAssetsSchema from '../../schema/post/post-asset.schema';
 import schema from '../../schema/post/post.schema';
-import commentSchema from '../../schema/post/comment.schema';
 
 class PostController extends CrudService<Post> {
   constructor() {
@@ -27,7 +27,7 @@ class PostController extends CrudService<Post> {
         // Delete comments
         await commentSchema.deleteMany({ post: post._id });
 
-        response.status(statusCode.OK).json({ data: post });
+        super.delete(request, response);
       } else {
         response.status(statusCode.NOT_FOUND).json({ error: 'Item not found' });
       }
@@ -110,7 +110,7 @@ export default new PostController();
 // }
 
 // async function createPost(req: Request, response: Response) {
-//   const request = req as IRequest;
+//   const request = req as AuthenticatedRequest;
 
 //   const files = request.files as Record<string, MFile[]>;
 
@@ -155,7 +155,7 @@ export default new PostController();
 // }
 
 // async function updatePost(req: Request, response: Response) {
-//   const request = req as IRequest;
+//   const request = req as AuthenticatedRequest;
 
 //   const files = request.files as Record<string, MFile[]>;
 
@@ -226,7 +226,7 @@ export default new PostController();
 // }
 
 // async function deletePost(req: Request, response: Response) {
-//   const request = req as IRequest;
+//   const request = req as AuthenticatedRequest;
 
 //   const { id } = request.params;
 
@@ -331,7 +331,7 @@ export default new PostController();
 // }
 
 // async function addComment(req: Request, response: Response) {
-//   const request = req as IRequest;
+//   const request = req as AuthenticatedRequest;
 
 //   const body = {
 //     body: request.body.body,
@@ -357,7 +357,7 @@ export default new PostController();
 // }
 
 // async function deleteComment(req: Request, response: Response) {
-//   const request = req as IRequest;
+//   const request = req as AuthenticatedRequest;
 
 //   const { commentId } = request.params;
 
@@ -383,7 +383,7 @@ export default new PostController();
 // }
 
 // async function react(req: Request, response: Response) {
-//   const request = req as IRequest;
+//   const request = req as AuthenticatedRequest;
 
 //   const body = {
 //     react: request.body.react,

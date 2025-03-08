@@ -133,4 +133,17 @@ const updateUser = [
   },
 ];
 
-export default { updateUser };
+const resetPassword = [
+  check('email')
+    .notEmpty()
+    .withMessage('Email an not be empty!')
+    .bail()
+    .trim()
+    .normalizeEmail()
+    .bail()
+    .isEmail()
+    .withMessage('Invalid email address!')
+    .bail(),
+];
+
+export default { updateUser, resetPassword };

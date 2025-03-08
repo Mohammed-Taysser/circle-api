@@ -2,6 +2,7 @@ import { Request } from 'express';
 import { User } from './user';
 import { Secret } from 'jsonwebtoken';
 import { StringValue } from 'ms';
+import { RootFilterQuery } from 'mongoose';
 
 interface Configuration {
   env: string;
@@ -16,8 +17,12 @@ interface Configuration {
   };
 }
 
-interface IRequest extends Request {
+interface AuthenticatedRequest extends Request {
   user: User;
+}
+
+interface FilterRequest<T> extends Request {
+  filters: RootFilterQuery<T>;
 }
 
 // JWT
