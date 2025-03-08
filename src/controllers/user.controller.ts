@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import CrudService from '../core/CRUD';
 import schema from '../schema/user.schema';
+import statusCode from 'http-status-codes';
 import { AuthenticatedRequest } from '../types/app';
+import { uploadUserOrGroupImage } from '../utils/multer';
 
 class UserController extends CrudService<User> {
   constructor() {
@@ -21,20 +23,34 @@ class UserController extends CrudService<User> {
     this.resetPassword = this.resetPassword.bind(this);
   }
 
-  async update(request: Request, response: Response) {
+  async update(req: Request, response: Response) {
+    const request = req as AuthenticatedRequest;
+
     const { avatar, cover, ...resetBody } = request.body;
 
-    const body = {
-      ...resetBody,
-    };
+    try {
+      const body = { ...resetBody };
 
-    if (request.file) {
-      body.avatar = request.file.path.split('public')[1];
+      const avatarUrl = await uploadUserOrGroupImage(
+        request,
+        'users',
+        'avatar'
+      );
+      if (avatarUrl) {
+        body.avatar = avatarUrl;
+      }
+
+      const coverUrl = await uploadUserOrGroupImage(request, 'users', 'cover');
+      if (coverUrl) {
+        body.cover = coverUrl;
+      }
+
+      request.body = body;
+
+      super.update(request, response);
+    } catch (error) {
+      response.status(statusCode.BAD_REQUEST).json({ error });
     }
-
-    request.body = body;
-
-    super.update(request, response);
   }
 
   async resetPassword(req: Request, response: Response) {

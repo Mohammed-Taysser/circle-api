@@ -32,7 +32,7 @@ const groupSchema = new mongoose.Schema<Group>(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Badge',
             autopopulate: {
-              select: 'label body picture',
+              select: 'label body logo',
               maxDepth: 1,
             },
           },

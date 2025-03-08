@@ -1,5 +1,5 @@
 import express from 'express';
-import { multerUpload } from '../utils/multer';
+import { createMulterUpload } from '../utils/multer';
 import controller from '../controllers/user.controller';
 import authorization from '../middleware/authorization';
 import validation from '../validation/user.validation';
@@ -18,7 +18,10 @@ router.patch(
   '/:id',
   authorization,
   validation.updateUser,
-  multerUpload('users').single('avatar'),
+  createMulterUpload('image').fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 },
+  ]),
   controller.update
 );
 router.delete('/:id', authorization, controller.delete);

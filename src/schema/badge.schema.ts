@@ -15,7 +15,7 @@ const badgeSchema = new mongoose.Schema<Badge>(
       trim: true,
       minlength: [10, 'body should be at least 10 characters!'],
     },
-    picture: {
+    logo: {
       type: String,
       trim: true,
       default: '/avatar.jpg',

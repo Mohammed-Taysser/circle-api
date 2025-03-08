@@ -128,21 +128,25 @@ class CrudService<T extends MongoDocument> {
         .json({ error: 'No data provided' });
     }
 
-    const disallowedFields = Object.keys(request.body).filter(
-      (field) => !this.whitelistFields.includes(field as keyof T)
-    );
+    let updateData = request.body;
 
-    if (disallowedFields.length > 0) {
-      return response.status(statusCode.BAD_REQUEST).json({
-        error: `The following fields are not allowed to be updated: ${disallowedFields.join(', ')}`,
-      });
+    if (this.whitelistFields.length > 0) {
+      const disallowedFields = Object.keys(request.body).filter(
+        (field) => !this.whitelistFields.includes(field as keyof T)
+      );
+
+      if (disallowedFields.length > 0) {
+        return response.status(statusCode.BAD_REQUEST).json({
+          error: `The following fields are not allowed to be updated: ${disallowedFields.join(', ')}`,
+        });
+      }
+
+      updateData = Object.fromEntries(
+        Object.entries(request.body).filter(([key]) =>
+          this.whitelistFields.includes(key as keyof T)
+        )
+      );
     }
-
-    const updateData = Object.fromEntries(
-      Object.entries(request.body).filter(([key]) =>
-        this.whitelistFields.includes(key as keyof T)
-      )
-    );
 
     if (Object.keys(updateData).length === 0) {
       return response
