@@ -21,6 +21,22 @@ class UserController extends CrudService<User> {
     this.resetPassword = this.resetPassword.bind(this);
   }
 
+  async update(request: Request, response: Response) {
+    const { avatar, cover, ...resetBody } = request.body;
+
+    const body = {
+      ...resetBody,
+    };
+
+    if (request.file) {
+      body.avatar = request.file.path.split('public')[1];
+    }
+
+    request.body = body;
+
+    super.update(request, response);
+  }
+
   async resetPassword(req: Request, response: Response) {
     const request = req as AuthenticatedRequest;
 

@@ -42,7 +42,7 @@ const authorization = async (
           .json({ error: "you aren't authorize, please change your password" });
       }
 
-      const { password, ...restUserInfo } = userDB;
+      const { password, ...restUserInfo } = userDB.toJSON();
       request.user = restUserInfo;
 
       next();

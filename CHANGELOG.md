@@ -27,3 +27,4 @@
 - [ ] add logs
 - [ ] add forget & reset password
 - [ ] add dashboard staatus
+- [ ] cron jop to delete old avatars

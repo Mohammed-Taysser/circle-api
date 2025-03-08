@@ -1,24 +1,46 @@
+import dayjs from 'dayjs';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
+import { AuthenticatedRequest } from 'types/app';
 
-type MulterTypes = 'user' | 'group';
+type MulterTypes = 'users' | 'groups';
 
-const multerUpload = (type: MulterTypes) =>
-  multer({
+function multerUpload(type: MulterTypes) {
+  return multer({
     limits: {
       fileSize: 5 * 1024 * 1024, // 5MB
     },
-    dest: `./public/uploads/${type}`,
+    storage: multer.diskStorage({
+      destination: (req, file, callback) => {
+        const request = req as AuthenticatedRequest;
+        const today = dayjs().format('YYYY-MM-DD');
+        const destination = path.resolve(
+          __dirname,
+          `../../public/uploads/${type}/avatar/${today}/${request.user._id}`
+        );
 
-    fileFilter: (_request, file, callback) => {
-      const ext = path.extname(file.originalname);
+        // Ensure the directory exists
+        if (!fs.existsSync(destination)) {
+          fs.mkdirSync(destination, { recursive: true });
+        }
 
-      if (ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') {
-        callback(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        callback(null, destination);
+      },
+      filename: (request, file, callback) => {
+        const formattedTime = dayjs().format('HH-mm-ss');
+        const extension = file.mimetype.split('/')[1];
+        callback(null, `${formattedTime}.${extension}`);
+      },
+    }),
+    fileFilter: (request, file, callback) => {
+      if (!file.mimetype.startsWith('image/')) {
+        callback(new Error('Only images are allowed'));
         return;
       }
       callback(null, true);
     },
   });
+}
 
-export default multerUpload;
+export { multerUpload };
