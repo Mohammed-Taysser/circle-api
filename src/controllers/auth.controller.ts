@@ -26,7 +26,11 @@ async function register(request: Request, response: Response) {
 
     const token = await generateToken(jwtPayload);
 
-    response.status(statusCode.CREATED).json({ user, token });
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    response
+      .status(statusCode.CREATED)
+      .json({ data: { user: userWithoutPassword, token } });
   } catch (error) {
     response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
   }
@@ -48,7 +52,7 @@ async function refreshToken(request: Request, response: Response) {
 
   const token = await generateToken(user);
 
-  response.status(statusCode.OK).json({ token });
+  response.status(statusCode.OK).json({ data: token });
 }
 
 async function me(request: Request, response: Response) {

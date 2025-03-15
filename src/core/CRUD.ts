@@ -43,7 +43,6 @@ class CrudService<T extends MongoDocument> {
     const request = req as FilterRequest<T>;
 
     const filters = request.filters;
-    console.log(filters);
 
     const pagination = calculatePagination(request);
 

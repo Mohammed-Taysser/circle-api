@@ -36,7 +36,6 @@ if (error) {
 
 const CONFIG: Configuration = {
   env: envVars.NODE_ENV,
-
   server: {
     port: envVars.PORT,
     mongoUrl:
@@ -44,7 +43,6 @@ const CONFIG: Configuration = {
         ? envVars.MONGO_URL_DEV
         : envVars.MONGO_URL_PROD,
   },
-
   jwt: {
     secret: envVars.JWT_SECRET_KEY,
     refresh: envVars.JWT_REFRESH_KEY,

@@ -21,7 +21,7 @@
 - [ ] add docs
 - [ ] add tests
 - [ ] send email to user on account activation
-- [ ] send email on subscription
+- [ ] send email on subscription @emailjs/nodejs
 - [ ] active "isDelete" field
 - [ ] integrate social media auth
 - [ ] add logs

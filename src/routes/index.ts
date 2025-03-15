@@ -8,12 +8,10 @@ import helperRoutes from './helper.route';
 import postsRoutes from './post/posts.route';
 import subscriptionRoutes from './subscription.route';
 import usersRoutes from './user.route';
-import templatesRoutes from './templates.route';
 
 const router = express.Router();
 
 router.use('/', helperRoutes);
-router.use('/templates', templatesRoutes);
 router.use('/subscription', subscriptionRoutes);
 router.use(
   '/auth',
