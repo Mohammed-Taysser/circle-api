@@ -3,16 +3,22 @@ import controller from '../controllers/badge.controller';
 import authorization from '../middleware/authorization';
 import badgeValidation from '../validation/badge.validation';
 import { createMulterUpload } from '../utils/multer';
+import zodValidationMiddleware from '@/middleware/zod-validation.middleware';
 
 const router = express.Router();
 
 router.get('/', controller.getAll);
-router.post('/', authorization, badgeValidation.create, controller.create);
+router.post(
+  '/',
+  authorization,
+  zodValidationMiddleware(badgeValidation.create),
+  controller.create
+);
 router.get('/:id', controller.getById);
 router.patch(
   '/:id',
   authorization,
-  badgeValidation.update,
+  zodValidationMiddleware(badgeValidation.update),
   createMulterUpload('image').single('logo'),
   controller.update
 );

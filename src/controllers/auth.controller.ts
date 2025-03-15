@@ -3,6 +3,7 @@ import statusCode from 'http-status-codes';
 import { AuthenticatedRequest, JwtTokenPayload } from 'types/app';
 import schema from '../schema/user.schema';
 import { generateToken } from '../utils/jwt';
+import { comparePassword } from '@/utils/bcrypt';
 
 async function register(request: Request, response: Response) {
   try {
@@ -37,7 +38,26 @@ async function register(request: Request, response: Response) {
 }
 
 async function login(request: Request, response: Response) {
-  const { user } = request as AuthenticatedRequest;
+  const { email, password } = request.body;
+
+  const user = await schema.findOne({ email }).select('+password');
+
+  if (!user) {
+    return response.status(statusCode.BAD_REQUEST).json({
+      error: 'User not exist',
+    });
+  }
+
+  // password is bad
+  const isMatch = await comparePassword(password, user.password);
+
+  if (!isMatch) {
+    return response.status(statusCode.BAD_REQUEST).json({
+      error: {
+        password: 'Password Not Correct',
+      },
+    });
+  }
 
   const token = await generateToken(user);
 

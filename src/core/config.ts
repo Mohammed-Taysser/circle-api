@@ -1,52 +1,59 @@
 import 'dotenv/config';
-import Joi from 'joi';
+import { StringValue } from 'ms';
 import { Configuration } from 'types/app';
+import z from 'zod';
 
-const durationRegex = /^\d+[smhd]$/; // Example: 10s, 30m, 1h, 7d
+// Regex for validating JWT duration (e.g., 10s, 30m, 1h, 7d)
+const durationRegex = /^\d+[smhd]$/;
 
-const schema = Joi.object({
-  NODE_ENV: Joi.string()
-    .valid(...['development', 'production', 'test'])
-    .required(),
-  PORT: Joi.number().required().description('API Port'),
-  MONGO_URL_DEV: Joi.string()
-    .required()
-    .description('Mongo DB url for development'),
-  MONGO_URL_PROD: Joi.string()
-    .required()
-    .description('Mongo DB url for production'),
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']),
+  PORT: z.coerce.number().int().positive(),
+  MONGO_URL_DEV: z.string().url(),
+  MONGO_URL_PROD: z.string().url(),
 
-  JWT_SECRET_KEY: Joi.string().required().description('JWT secret key'),
-  JWT_REFRESH_KEY: Joi.string()
-    .required()
-    .description('JWT refresh secret key'),
-  JWT_LIFE_TIME: Joi.string()
-    .pattern(durationRegex)
-    .required()
-    .description('JWT expiration time (e.g., 10s, 30m, 1h, 7d)'),
-})
-  .unknown()
-  .required();
+  JWT_SECRET_KEY: z.string().min(10, {
+    message: 'JWT secret key must be at least 10 characters long',
+  }),
+  JWT_REFRESH_KEY: z.string().min(10, {
+    message: 'JWT refresh key must be at least 10 characters long',
+  }),
+  JWT_LIFE_TIME: z.string().regex(durationRegex, {
+    message: 'Invalid JWT expiration format. Use: 10s, 30m, 1h, 7d.',
+  }),
+});
 
-const { error, value: envVars } = schema.validate(process.env);
+// Parse and validate environment variables
+const result = envSchema.safeParse(process.env);
 
-if (error) {
-  throw new Error(`Config validation error: ${error.message}`);
+if (!result.success) {
+  console.error('\n❌ Configuration Validation Error:\n');
+
+  result.error.errors.forEach((err) => {
+    console.error(
+      ` 🔴 Field: ${err.path.join('.')}\n    ❗ Error: ${err.message}`
+    );
+  });
+
+  console.error(
+    '\n💡 Fix the above errors in your .env file and restart the server.\n'
+  );
+  process.exit(1); // Stop execution due to invalid configuration
 }
 
 const CONFIG: Configuration = {
-  env: envVars.NODE_ENV,
+  env: result.data.NODE_ENV,
   server: {
-    port: envVars.PORT,
+    port: result.data.PORT,
     mongoUrl:
-      envVars.NODE_ENV === 'development'
-        ? envVars.MONGO_URL_DEV
-        : envVars.MONGO_URL_PROD,
+      result.data.NODE_ENV === 'development'
+        ? result.data.MONGO_URL_DEV
+        : result.data.MONGO_URL_PROD,
   },
   jwt: {
-    secret: envVars.JWT_SECRET_KEY,
-    refresh: envVars.JWT_REFRESH_KEY,
-    life: envVars.JWT_LIFE_TIME,
+    secret: result.data.JWT_SECRET_KEY,
+    refresh: result.data.JWT_REFRESH_KEY,
+    life: result.data.JWT_LIFE_TIME as StringValue | number,
   },
 };
 

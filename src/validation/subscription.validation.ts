@@ -1,55 +1,25 @@
-import { NextFunction, Request, Response } from 'express';
-import { check, validationResult } from 'express-validator';
-import statusCode from 'http-status-codes';
+import z from 'zod';
 import schema from '../schema/subscription.schema';
 
-const subscription = [
-  check('email')
+const subscriptionSchema = z.object({
+  email: z
+    .string()
     .trim()
-    .normalizeEmail()
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail()
-    .custom(async (email) => {
-      await schema
-        .findOne({ email })
-        .then((subscription) => {
-          if (subscription) {
-            return Promise.reject('Email already in use');
-          }
+    .email({ message: 'Invalid email address!' })
+    .refine(
+      async (email) => {
+        const existingSubscription = await schema.findOne({ email });
+        return !existingSubscription;
+      },
+      { message: 'Email already in use' }
+    ),
+});
 
-          return null;
-        })
-        .catch((error) => Promise.reject(error));
-    })
-    .bail(),
-
-  (request: Request, response: Response, next: NextFunction) => {
-    const errors = validationResult(request);
-    if (!errors.isEmpty()) {
-      response.status(statusCode.BAD_REQUEST).json({ errors: errors.array() });
-    } else {
-      next();
-    }
-  },
-];
-
-const emailSubscriptionVerify = [
-  check('email')
-    .trim()
-    .normalizeEmail()
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail(),
-];
+const emailSubscriptionVerifySchema = z.object({
+  email: z.string().trim().email({ message: 'Invalid email address!' }),
+});
 
 export default {
-  emailSubscriptionVerify,
-  subscription,
+  subscription: subscriptionSchema,
+  emailSubscriptionVerify: emailSubscriptionVerifySchema,
 };

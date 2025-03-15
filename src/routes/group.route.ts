@@ -3,12 +3,18 @@ import controller from '../controllers/group.controller';
 import authorization from '../middleware/authorization';
 import validation from '../validation/group.validation';
 import { createMulterUpload } from '../utils/multer';
+import zodValidation from '@/middleware/zod-validation.middleware';
 
 const router = express.Router();
 
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
-router.post('/', authorization, validation.create, controller.create);
+router.post(
+  '/',
+  authorization,
+  zodValidation(validation.create),
+  controller.create
+);
 router.patch(
   '/:id',
   authorization,

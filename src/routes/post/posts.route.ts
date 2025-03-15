@@ -4,13 +4,24 @@ import authorization from '../../middleware/authorization';
 import validation from '../../validation/post.validation';
 import commentRouter from './comment.route';
 import postAssetsRouters from './post-assets.route';
+import zodValidation from '@/middleware/zod-validation.middleware';
 
 const router = express.Router();
 
 router.get('/', controller.getAll);
 router.get('/:postId', controller.getById);
-router.post('/', authorization, validation.createPost, controller.create);
-router.patch('/:postId', authorization, controller.update);
+router.post(
+  '/',
+  authorization,
+  zodValidation(validation.createPost),
+  controller.create
+);
+router.patch(
+  '/:postId',
+  authorization,
+  zodValidation(validation.updatePost),
+  controller.update
+);
 router.delete('/:postId', authorization, controller.delete);
 
 // Assets Routers
