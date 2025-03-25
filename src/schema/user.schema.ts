@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema<User>(
       max: [100, 'username is too long!'],
       min: [8, 'username is too short!'],
       trim: true,
+      index: true,
     },
     role: {
       type: String,
@@ -33,6 +34,7 @@ const userSchema = new mongoose.Schema<User>(
       unique: [true, 'Email already exists!'],
       max: [100, 'Email is too long!'],
       trim: true,
+      index: true,
     },
     password: {
       type: String,
@@ -96,9 +98,6 @@ const userSchema = new mongoose.Schema<User>(
 );
 
 userSchema.plugin(mongooseAutoPopulate);
-
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
 
 userSchema.pre('save', async function () {
   if (this.isModified('password')) {
