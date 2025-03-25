@@ -14,5 +14,6 @@ interface UserEvent extends MongoDocument {
   type: 'event' | 'birthday' | 'anniversary' | 'other';
   color: string;
   rate: number;
+  price: number;
   rateCount: number;
 }

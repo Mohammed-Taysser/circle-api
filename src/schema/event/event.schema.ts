@@ -84,6 +84,11 @@ const eventSchema = new mongoose.Schema<UserEvent>(
       max: [5, 'Rating must be at most 5'],
       set: (value: number) => value.toFixed(2),
     },
+    price: {
+      type: Number,
+      default: 0,
+      min: [0, 'Price must be at least 0'],
+    },
     rateCount: {
       type: Number,
       default: 0,

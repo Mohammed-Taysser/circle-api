@@ -27,4 +27,6 @@
 - [ ] add logs
 - [ ] add forget & reset password
 - [ ] add dashboard staatus
+- [ ] send email template from pug or brevo
+- [ ] store provider response in log table
 - [ ] cron jop to delete old avatars
