@@ -22,8 +22,8 @@ const ALLOWED_MIME_TYPES = {
 /**
  * Creates a multer upload instance with custom validation and limits.
  *
- * @param {string} type - The type of upload (e.g., 'image', 'video', 'audio').
- * @returns {multer.Multer} Multer instance for handling file uploads.
+ * The type of upload (e.g., 'image', 'video', 'audio').
+ * Returns a Multer instance for handling file uploads.
  */
 const createMulterUpload = (type: keyof typeof FILE_LIMITS) => {
   return multer({

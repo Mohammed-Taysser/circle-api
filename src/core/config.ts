@@ -21,6 +21,31 @@ const envSchema = z.object({
   JWT_LIFE_TIME: z.string().regex(durationRegex, {
     message: 'Invalid JWT expiration format. Use: 10s, 30m, 1h, 7d.',
   }),
+  BREVO_SMTP_HOST: z.string().refine(
+    (val) => {
+      const domainParts = val.split('.');
+      return (
+        domainParts.length > 2 &&
+        domainParts[domainParts.length - 1] === 'com' &&
+        domainParts[domainParts.length - 2] === 'brevo' &&
+        domainParts[domainParts.length - 3] === 'smtp-relay'
+      );
+    },
+    {
+      message: 'Invalid SMTP host! Must be similar to smtp-relay.brevo.com',
+    }
+  ),
+  BREVO_SMTP_PORT: z.coerce
+    .number()
+    .int()
+    .positive({ message: 'SMTP port must be a positive integer!' }),
+  BREVO_SMTP_USER: z.string().email({ message: 'Invalid SMTP user email!' }),
+  BREVO_SMTP_PASS: z
+    .string()
+    .min(8, { message: 'SMTP password must be at least 8 characters long!' }),
+  BREVO_DEFAULT_FROM: z
+    .string()
+    .email({ message: 'Invalid default from email!' }),
 });
 
 // Parse and validate environment variables
@@ -54,6 +79,13 @@ const CONFIG: Configuration = {
     secret: result.data.JWT_SECRET_KEY,
     refresh: result.data.JWT_REFRESH_KEY,
     life: result.data.JWT_LIFE_TIME as StringValue | number,
+  },
+  smtp: {
+    host: result.data.BREVO_SMTP_HOST,
+    port: result.data.BREVO_SMTP_PORT,
+    user: result.data.BREVO_SMTP_USER,
+    password: result.data.BREVO_SMTP_PASS,
+    defaultFrom: result.data.BREVO_DEFAULT_FROM,
   },
 };
 

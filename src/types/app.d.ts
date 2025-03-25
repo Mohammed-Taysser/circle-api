@@ -15,6 +15,13 @@ interface Configuration {
     refresh: string;
     life: StringValue | number;
   };
+  smtp: {
+    host: string;
+    port: number;
+    user: string;
+    password: string;
+    defaultFrom: string;
+  };
 }
 
 interface AuthenticatedRequest extends Request {

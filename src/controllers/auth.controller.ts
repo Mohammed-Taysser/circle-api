@@ -4,6 +4,7 @@ import { AuthenticatedRequest, JwtTokenPayload } from 'types/app';
 import schema from '../schema/user.schema';
 import { generateToken } from '../utils/jwt';
 import { comparePassword } from '@/utils/bcrypt';
+import mailService from '@/utils/nodemailer';
 
 async function register(request: Request, response: Response) {
   try {
@@ -26,6 +27,22 @@ async function register(request: Request, response: Response) {
     };
 
     const token = await generateToken(jwtPayload);
+
+    await mailService.sendEmail({
+      to: user.email,
+      subject: 'Welcome to Circle',
+      html: `
+        <h1>Hi ${user.firstName},</h1>
+        <p>Thank you for registering to Circle. We are excited to have you on board.</p>
+        <p>Here are your login details:</p>
+        <ul>
+          <li>Username: ${user.username}</li>
+          <li>Password: ${body.password}</li>
+        </ul>
+        <p>Use these credentials to log in to your account.</p>
+        <p>Best regards,<br>The Circle Team</p>
+      `,
+    });
 
     const { password, ...userWithoutPassword } = user.toObject();
 
