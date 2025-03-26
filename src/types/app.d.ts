@@ -1,5 +1,8 @@
 import { Request } from 'express';
 import { User } from './user';
+import { Secret } from 'jsonwebtoken';
+import { StringValue } from 'ms';
+import { RootFilterQuery } from 'mongoose';
 
 interface Configuration {
   env: string;
@@ -8,20 +11,25 @@ interface Configuration {
     mongoUrl: string;
   };
   jwt: {
-    secret: string;
+    secret: Secret;
     refresh: string;
-    life: string;
+    life: StringValue | number;
   };
-
-  cloudinary: {
-    cloudName: string;
-    apiKey: string;
-    apiSecret: string;
+  smtp: {
+    host: string;
+    port: number;
+    user: string;
+    password: string;
+    defaultFrom: string;
   };
 }
 
-interface IRequest extends Request {
+interface AuthenticatedRequest extends Request {
   user: User;
+}
+
+interface FilterRequest<T> extends Request {
+  filters: RootFilterQuery<T>;
 }
 
 // JWT
@@ -32,6 +40,3 @@ interface JwtTokenPayload {
   lastName: string;
   username: string;
 }
-
-// Cloudinary
-type MFile = Express.Multer.File;

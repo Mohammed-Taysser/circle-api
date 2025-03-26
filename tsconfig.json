@@ -1,15 +1,18 @@
 {
-	"compilerOptions": {
-		"module": "NodeNext",
-		"baseUrl": "./src",
-		"sourceMap": true,
-		"outDir": "./dist",
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"strict": true,
-		"noImplicitAny": true,
-		"skipLibCheck": true
-	},
-	"include": ["./src/**/*"],
+  "compilerOptions": {
+    "module": "NodeNext",
+    "baseUrl": "./src",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

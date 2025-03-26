@@ -1,9 +1,4 @@
-import { Document } from 'mongoose';
-import { Badge } from './badge';
-import { Post } from './post';
-
-interface User {
-  _id: string;
+interface User extends MongoDocument {
   username: string;
   role: string;
   firstName: string;
@@ -14,6 +9,10 @@ interface User {
   password: string;
   badges: Badge[];
   bookmarks: Post[];
+  passwordChangeAt: Date;
+  passwordResetToken: string;
+  passwordResetExpires: Date;
+  status: 'active' | 'inactive' | 'banned';
+  isVerified: boolean;
+  isDeleted: boolean;
 }
-
-type IUser = Document & User;

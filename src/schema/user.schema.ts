@@ -1,13 +1,17 @@
 import mongoose from 'mongoose';
-import { IUser } from 'types/user';
-import { hashPassword } from '../utils/password';
+import { hashPassword } from '../utils/bcrypt';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<User>(
   {
     username: {
       type: String,
       required: [true, 'username not provided!'],
       unique: [true, 'username already exists!'],
+      max: [100, 'username is too long!'],
+      min: [8, 'username is too short!'],
+      trim: true,
+      index: true,
     },
     role: {
       type: String,
@@ -18,48 +22,94 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: [true, 'last name not provided!'] },
     avatar: {
       type: String,
-      default:
-        'https://res.cloudinary.com/mohammed-taysser/image/upload/v1654679434/paperCuts/authors/avatar-2_grpukn.png',
+      default: '/avatar.jpg',
     },
     cover: {
       type: String,
-      default:
-        'https://res.cloudinary.com/mohammed-taysser/image/upload/v1657350049/lama/users/5437842_py0e8h.jpg',
+      default: '/cover.jpg',
     },
     email: {
       type: String,
       required: [true, 'Email not provided!'],
       unique: [true, 'Email already exists!'],
+      max: [100, 'Email is too long!'],
+      trim: true,
+      index: true,
     },
     password: {
       type: String,
       required: [true, 'password not provided!'],
+      select: false,
     },
     badges: [
       {
-        badge: { type: mongoose.Schema.Types.ObjectId, ref: 'Badge' },
+        badge: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Badge',
+          autopopulate: {
+            select: 'name description image',
+            maxDepth: 1,
+          },
+        },
         earnAt: { type: Date, default: new Date() },
       },
     ],
     bookmarks: [
       {
-        post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+        post: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Post',
+          autopopulate: {
+            select: 'title',
+            maxDepth: 1,
+          },
+        },
         saveAt: { type: Date, default: new Date() },
       },
     ],
+    passwordChangeAt: {
+      type: Date,
+    },
+    status: {
+      type: String,
+      default: 'active',
+      enum: ['active', 'inactive', 'banned'],
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
-    timestamps: {
-      createdAt: 'joinAt',
-      updatedAt: 'updatedAt',
-    },
+    timestamps: true,
   }
 );
+
+userSchema.plugin(mongooseAutoPopulate);
 
 userSchema.pre('save', async function () {
   if (this.isModified('password')) {
     this.password = await hashPassword(this.password);
+    this.passwordChangeAt = new Date();
   }
 });
 
-export default mongoose.model<IUser>('User', userSchema);
+// userSchema.pre(/^find/, function (next) {
+//   this.find({ isDeleted: { $ne: false } });
+
+//   next();
+// });
+
+export default mongoose.model<User>('User', userSchema);

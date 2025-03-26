@@ -1,21 +1,30 @@
 import express from 'express';
-import controller from '../controllers/users.controller';
+import { createMulterUpload } from '../utils/multer';
+import controller from '../controllers/user.controller';
 import authorization from '../middleware/authorization';
-import { userUpload } from '../utils/multer';
 import validation from '../validation/user.validation';
+import zodValidation from '@/middleware/zod-validation.middleware';
 
 const router = express.Router();
 
-router.get('/', controller.allUsers);
-router.get('/search', controller.search);
-router.get('/:id', controller.getUser);
+router.get('/', controller.getAll);
+router.get('/:id', controller.getById);
+router.patch(
+  '/reset-password',
+  authorization,
+  zodValidation(validation.resetPassword),
+  controller.resetPassword
+);
 router.patch(
   '/:id',
   authorization,
-  userUpload,
-  validation.updateUser,
-  controller.updateUser
+  zodValidation(validation.updateUser),
+  createMulterUpload('image').fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 },
+  ]),
+  controller.update
 );
-router.delete('/:id', authorization, controller.deleteUser);
+router.delete('/:id', authorization, controller.delete);
 
 export default router;

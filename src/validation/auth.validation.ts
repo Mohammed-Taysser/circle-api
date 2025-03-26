@@ -1,210 +1,67 @@
-import { NextFunction, Request, Response } from 'express';
-import { check, validationResult } from 'express-validator';
-import statusCode from 'http-status-codes';
-import { IRequest } from 'types/app';
+import z from 'zod';
 import schema from '../schema/user.schema';
-import { comparePassword } from '../utils/password';
 
-const login = [
-  check('password')
-    .notEmpty()
-    .withMessage('Password can not be empty!')
-    .bail()
+const loginSchema = z.object({
+  body: z.object({
+    email: z
+      .string()
+      .trim()
+      .min(1, { message: 'Email cannot be empty!' })
+      .email({ message: 'Invalid email address!' }),
+    password: z.string().min(1, { message: 'Password cannot be empty!' }),
+  }),
+});
+
+const registerSchema = z.object({
+  body: z.object({
+    firstName: z.string().trim().min(1, 'First name cannot be empty!'),
+    lastName: z.string().trim().min(1, 'Last name cannot be empty!'),
+    email: z
+      .string()
+      .trim()
+      .min(1, 'Email cannot be empty!')
+      .email('Invalid email address!')
+      .refine(async (email) => {
+        const user = await schema.findOne({ email });
+        return !user;
+      }, 'Email already in use'),
+    username: z
+      .string()
+      .trim()
+      .min(8, 'Minimum 8 characters required!')
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Please provide a valid username!')
+      .refine(async (username) => {
+        const user = await schema.findOne({ username });
+        return !user;
+      }, 'Username already in use'),
+    password: z
+      .string()
+      .trim()
+      .min(8, 'Minimum 8 characters required!')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+        'Please provide a strong password!'
+      ),
+  }),
+});
+
+const forgotPasswordSchema = z.object({
+  email: z
+    .string()
     .trim()
-    .escape()
-    .isLength({ min: 8 })
-    .withMessage('Minimum 8 characters required!')
-    .bail()
-    .isStrongPassword()
-    .withMessage('Please provide strong password!')
-    .bail(),
-  check('email')
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .trim()
-    .normalizeEmail()
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail(),
-  async (req: Request, response: Response, next: NextFunction) => {
-    const request = req as IRequest;
-
-    const errors = validationResult(request);
-
-    if (!errors.isEmpty()) {
-      return response
-        .status(statusCode.BAD_REQUEST)
-        .json({ errors: errors.array() });
-    }
-
-    const { email, password } = request.body;
-
-    const user = await schema.findOne({ email });
-
-    if (!user) {
-      return response.status(statusCode.BAD_REQUEST).json({
-        error: 'User not exist',
-      });
-    }
-
-    // password is bad
-    const isMatch = await comparePassword(password, user.password);
-
-    if (!isMatch) {
-      return response.status(statusCode.BAD_REQUEST).json({
-        error: {
-          password: 'Password Not Correct',
-        },
-      });
-    }
-
-    // every thing ok, attach user to request
-    request.user = user;
-
-    next();
-  },
-];
-
-const register = [
-  check('password')
-    .trim()
-    .escape()
-    .notEmpty()
-    .withMessage('Password can not be empty!')
-    .bail()
-    .isLength({ min: 8 })
-    .withMessage('Minimum 8 characters required!')
-    .bail()
-    .isStrongPassword()
-    .withMessage('Please provide strong password!')
-    .bail(),
-  check('firstName')
-    .trim()
-    .escape()
-    .notEmpty()
-    .withMessage('First name can not be empty!')
-    .bail(),
-  check('lastName')
-    .trim()
-    .escape()
-    .notEmpty()
-    .withMessage('Last name can not be empty!')
-    .bail(),
-  check('email')
-    .trim()
-    .normalizeEmail()
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail()
-    .custom(async (email) => {
-      await schema
-        .findOne({ email })
-        .then((user) => {
-          if (user) {
-            return Promise.reject('Email already in use');
-          }
-
-          return null;
-        })
-        .catch((error) => Promise.reject(error));
-    })
-    .bail(),
-  check('username')
-    .trim()
-    .escape()
-    .notEmpty()
-    .withMessage('Username can not be empty!')
-    .bail()
-    .isLength({ min: 8 })
-    .withMessage('Minimum 8 characters required!')
-    .bail()
-    .isSlug()
-    .withMessage('Please provide username!')
-    .bail()
-    .custom(async (username) => {
-      await schema
-        .findOne({ username })
-        .then((user) => {
-          if (user) {
-            return Promise.reject('Username already in use');
-          }
-
-          return null;
-        })
-        .catch((error) => Promise.reject(error));
-    })
-    .bail(),
-  (request: Request, response: Response, next: NextFunction) => {
-    const errors = validationResult(request);
-
-    if (!errors.isEmpty()) {
-      response.status(statusCode.BAD_REQUEST).json({ errors: errors.array() });
-    } else {
-      next();
-    }
-  },
-];
-
-const forgotPassword = [
-  check('email')
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .trim()
-    .normalizeEmail()
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail()
-    .custom(async (email) => {
-      await schema
-        .findOne({ email })
-        .then((user) => {
-          if (!user) {
-            return Promise.reject('Email not exist');
-          }
-
-          return null;
-        })
-        .catch((error) => Promise.reject(error));
-    })
-    .bail(),
-];
-
-const resetPassword = [
-  check('email')
-    .notEmpty()
-    .withMessage('Email an not be empty!')
-    .bail()
-    .trim()
-    .normalizeEmail()
-    .bail()
-    .isEmail()
-    .withMessage('Invalid email address!')
-    .bail()
-    .custom(async (email) => {
-      await schema
-        .findOne({ email })
-        .then((user) => {
-          if (!user) {
-            return Promise.reject('Email not exist');
-          }
-
-          return null;
-        })
-        .catch((error) => Promise.reject(error));
-    })
-    .bail(),
-];
+    .min(1, 'Email cannot be empty!')
+    .email('Invalid email address!')
+    .refine(
+      async (email) => {
+        const user = await schema.findOne({ email });
+        return !!user; // Return true if the user exists, false otherwise
+      },
+      { message: 'Email does not exist' }
+    ),
+});
 
 export default {
-  login,
-  register,
-  forgotPassword,
-  resetPassword,
+  login: loginSchema,
+  register: registerSchema,
+  forgotPassword: forgotPasswordSchema,
 };

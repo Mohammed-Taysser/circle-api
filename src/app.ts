@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application } from 'express';
 import rateLimiter from 'express-rate-limit';
@@ -9,14 +10,19 @@ import morgan from 'morgan';
 import config from './core/config';
 import compression from './middleware/compression';
 import routeNotFound from './middleware/routeNotFound';
-import routes from './routes';
 import serverError from './middleware/serverError';
+import routes from './routes';
+import path from 'path';
 
 // Express instance
 const app: Application = express();
 
 app.enable('verbose errors');
 app.use(morgan('dev'));
+
+// Template Engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'templates'));
 
 // ------------
 // Middleware |
@@ -27,6 +33,9 @@ app.use(helmet());
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());
+
+// parse cookies
+app.use(cookieParser());
 
 // parse body params and attache them to req.body
 // parse application/x-www-form-urlencoded
@@ -60,9 +69,7 @@ mongoose
   .connect(config.server.mongoUrl)
   .then(() => {
     app.listen(config.server.port, () => {
-      console.log(
-        `🚀 API Server listening on, :${config.server.port}/api/v1/health-check`
-      );
+      console.log(`🚀 API Server listening on port ${config.server.port}`);
 
       // mount api routes
       app.use('/api/v1', routes);

@@ -1,4 +1,4 @@
-import jwt, { VerifyOptions } from 'jsonwebtoken';
+import jwt, { JwtPayload, VerifyOptions } from 'jsonwebtoken';
 import { JwtTokenPayload } from 'types/app';
 import CONFIG from '../core/config';
 
@@ -19,7 +19,7 @@ async function generateToken(user: JwtTokenPayload) {
 }
 
 function verifyToken(token: string, options?: VerifyOptions) {
-  return jwt.verify(token, CONFIG.jwt.secret, options) as JwtTokenPayload;
+  return jwt.verify(token, CONFIG.jwt.secret, options) as JwtPayload;
 }
 
 export { generateToken, verifyToken };

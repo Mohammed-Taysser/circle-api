@@ -1,24 +1,33 @@
-import { NextFunction, Request, Response } from 'express';
-import { check, validationResult } from 'express-validator';
-import statusCode from 'http-status-codes';
+import z from 'zod';
+import { schema } from './global.validation';
 
-const createGroup = [
-  check('name')
-    .trim()
-    .escape()
-    .notEmpty()
-    .withMessage('Group name can not be empty!')
-    .bail(),
-  (request: Request, response: Response, next: NextFunction) => {
-    const errors = validationResult(request);
-    if (!errors.isEmpty()) {
-      response.status(statusCode.BAD_REQUEST).json({ errors: errors.array() });
-    } else {
-      next();
-    }
-  },
-];
+// Base Schema (common fields)
+const groupBaseSchema = z.object({
+  visibility: z.enum(['public', 'private', 'friends'], {
+    required_error: 'Visibility is required!',
+  }),
+  name: z.string().min(2, 'Name too short!').trim(),
+  avatar: z.string().trim().optional(),
+  cover: z.string().trim().optional(),
+  badges: z
+    .array(
+      z.object({
+        badge: schema.objectId,
+        earnAt: schema.datetime.optional(),
+      })
+    )
+    .optional(),
+});
+
+// Create Schema (requires all fields)
+const createGroupSchema = z.object({ body: groupBaseSchema });
+
+// Update Schema (all fields optional for partial updates)
+const updateGroupSchema = z.object({
+  body: groupBaseSchema.partial(),
+});
 
 export default {
-  create: createGroup,
+  create: createGroupSchema,
+  update: updateGroupSchema,
 };

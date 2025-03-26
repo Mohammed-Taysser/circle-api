@@ -1,27 +1,27 @@
 import express from 'express';
 import controller from '../controllers/badge.controller';
 import authorization from '../middleware/authorization';
-import multer from '../utils/multer';
 import badgeValidation from '../validation/badge.validation';
+import { createMulterUpload } from '../utils/multer';
+import zodValidationMiddleware from '@/middleware/zod-validation.middleware';
 
 const router = express.Router();
 
-router.get('/', controller.allBadges);
+router.get('/', controller.getAll);
 router.post(
   '/',
   authorization,
-  multer.single('picture'),
-  badgeValidation.create,
-  controller.createBadge
+  zodValidationMiddleware(badgeValidation.create),
+  controller.create
 );
-router.get('/search', controller.search);
-router.get('/:id', controller.getBadge);
+router.get('/:id', controller.getById);
 router.patch(
   '/:id',
   authorization,
-  multer.single('picture'),
-  controller.updateBadge
+  zodValidationMiddleware(badgeValidation.update),
+  createMulterUpload('image').single('logo'),
+  controller.update
 );
-router.delete('/:id', authorization, controller.deleteBadge);
+router.delete('/:id', authorization, controller.delete);
 
 export default router;

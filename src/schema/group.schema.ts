@@ -1,35 +1,55 @@
 import mongoose from 'mongoose';
-import { IGroup } from 'types/group';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 
-const groupSchema = new mongoose.Schema(
+const groupSchema = new mongoose.Schema<Group>(
   {
     visibility: {
       type: String,
       default: 'public',
-      enum: ['public', 'private'],
-      required: [true, 'Please specify group visibility'],
+      enum: ['public', 'private', 'friends'],
     },
-    name: { type: String, required: [true, 'name not provided!'] },
+    name: {
+      type: String,
+      required: [true, 'name not provided!'],
+      trim: true,
+      minlength: [2, 'name too short!'],
+      unique: [true, 'name must be unique!'],
+      index: true,
+    },
     avatar: {
       type: String,
-      default:
-        'https://res.cloudinary.com/mohammed-taysser/image/upload/v1654679434/paperCuts/authors/avatar-2_grpukn.png',
+      default: '/avatar.jpg',
+      trim: true,
     },
     cover: {
-			type: String,
-			default:
-				'https://res.cloudinary.com/mohammed-taysser/image/upload/v1657350049/lama/users/5437842_py0e8h.jpg',
-		},
-    badges: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Badge',
-      },
-    ],
+      type: String,
+      default: '/cover.jpg',
+      trim: true,
+    },
+    badges: {
+      type: [
+        {
+          badge: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Badge',
+            autopopulate: {
+              select: 'label body logo',
+              maxDepth: 1,
+            },
+          },
+          earnAt: { type: Date, default: () => new Date() }, // Ensures dynamic default date
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model<IGroup>('Group', groupSchema);
+groupSchema.plugin(mongooseAutoPopulate);
+
+groupSchema.index({ visibility: 1 });
+
+export default mongoose.model<Group>('Group', groupSchema);

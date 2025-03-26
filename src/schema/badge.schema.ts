@@ -1,18 +1,29 @@
 import mongoose from 'mongoose';
-import { IBadge } from 'types/badge';
 
-const badgeSchema = new mongoose.Schema<IBadge>(
+const badgeSchema = new mongoose.Schema<Badge>(
   {
-    label: { type: String, required: [true, 'label not provided!'] },
-    body: { type: String, required: [true, 'body not provided!'] },
-    picture: { type: String, required: [true, 'picture not provided!'] },
+    label: {
+      type: String,
+      required: [true, 'label not provided!'],
+      trim: true,
+      minlength: [3, 'label should be at least 3 characters!'],
+      unique: [true, 'label must be unique!'],
+    },
+    body: {
+      type: String,
+      required: [true, 'body not provided!'],
+      trim: true,
+      minlength: [10, 'body should be at least 10 characters!'],
+    },
+    logo: {
+      type: String,
+      trim: true,
+      default: '/avatar.jpg',
+    },
   },
   {
-    timestamps: {
-      createdAt: 'earnedAt',
-      updatedAt: 'updatedAt',
-    },
+    timestamps: true,
   }
 );
 
-export default mongoose.model<IBadge>('Badge', badgeSchema);
+export default mongoose.model<Badge>('Badge', badgeSchema);
