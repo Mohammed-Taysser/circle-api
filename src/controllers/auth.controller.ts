@@ -48,7 +48,7 @@ async function register(request: Request, response: Response) {
 
     response
       .status(statusCode.CREATED)
-      .json({ data: { user: userWithoutPassword, token } });
+      .json({ user: userWithoutPassword, token });
   } catch (error) {
     response.status(statusCode.INTERNAL_SERVER_ERROR).json({ error });
   }
@@ -78,8 +78,10 @@ async function login(request: Request, response: Response) {
 
   const token = await generateToken(user);
 
+  const { password: pass, ...userWithoutPassword } = user.toObject();
+
   response.status(statusCode.OK).json({
-    user,
+    user: userWithoutPassword,
     token,
   });
 }

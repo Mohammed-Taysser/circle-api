@@ -12,6 +12,10 @@ router.get('/:id', controller.getById);
 router.post(
   '/',
   authorization,
+  createMulterUpload('image').fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 },
+  ]),
   zodValidation(validation.create),
   controller.create
 );

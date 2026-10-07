@@ -35,7 +35,7 @@ class ReviewController extends CrudService<Review> {
 
       const existingReview = await this.model.findOne({
         event: eventId,
-        user: request.user._id,
+        user: request.body.user,
       });
 
       if (existingReview) {

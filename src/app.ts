@@ -29,7 +29,11 @@ app.set('views', path.join(__dirname, 'templates'));
 // ------------
 
 // secure apps by setting various HTTP headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());

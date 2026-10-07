@@ -10,6 +10,31 @@ class BadgeController extends CrudService<Badge> {
     super(schema, { simpleFields: ['label'] });
   }
 
+  async create(req: Request, response: Response) {
+    const request = req as AuthenticatedRequest;
+
+    const { logo, ...resetBody } = request.body;
+
+    try {
+      const body = { ...resetBody };
+
+      if (request.file && request.file.fieldname === 'logo') {
+        body.logo = await uploadImage(
+          request.file,
+          'badges',
+          String(request.user._id),
+          'badge'
+        );
+      }
+
+      request.body = body;
+
+      await super.create(request, response);
+    } catch (error) {
+      response.status(statusCode.BAD_REQUEST).json({ error });
+    }
+  }
+
   async update(req: Request, response: Response) {
     const request = req as AuthenticatedRequest;
 

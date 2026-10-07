@@ -11,6 +11,7 @@ router.get('/', controller.getAll);
 router.post(
   '/',
   authorization,
+  createMulterUpload('image').single('logo'),
   zodValidationMiddleware(badgeValidation.create),
   controller.create
 );

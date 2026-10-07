@@ -55,20 +55,26 @@ const assetSchema = z.object({
 
 // 🔹 Base schema (shared between create and update)
 const basePostSchema = z.object({
-  variant: z.enum(postVariants),
-  visibility: z.enum(visibilityOptions),
-  activity: z.string().optional(),
-  body: z.string().optional(),
-  assets: z.array(assetSchema).optional(),
+  body: z.object({
+    variant: z.enum(postVariants),
+    visibility: z.enum(visibilityOptions),
+    activity: z.string().optional(),
+    body: z.string().optional(),
+    assets: z.array(assetSchema).optional(),
+  }),
 });
 
 // 🔹 Create Schema (Extends Base, Requires User)
 const createPostSchema = basePostSchema.extend({
-  user: z.string().min(1, 'User is required'),
+  body: basePostSchema.shape.body.extend({
+    user: z.string().min(1, 'User is required'),
+  }),
 });
 
 // 🔹 Update Schema (Partial, since all fields are optional)
-const updatePostSchema = basePostSchema.partial();
+const updatePostSchema = z.object({
+  body: basePostSchema.shape.body.partial(),
+});
 
 export default {
   reaction: reactionSchema,

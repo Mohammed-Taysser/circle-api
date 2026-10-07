@@ -10,6 +10,36 @@ class GroupController extends CrudService<Group> {
     super(schema, { simpleFields: ['name'] });
   }
 
+  async create(req: Request, response: Response) {
+    const request = req as AuthenticatedRequest;
+
+    const { avatar, cover, ...resetBody } = request.body;
+
+    try {
+      const body = { ...resetBody };
+
+      const avatarUrl = await uploadUserOrGroupImage(
+        request,
+        'groups',
+        'avatar'
+      );
+      if (avatarUrl) {
+        body.avatar = avatarUrl;
+      }
+
+      const coverUrl = await uploadUserOrGroupImage(request, 'groups', 'cover');
+      if (coverUrl) {
+        body.cover = coverUrl;
+      }
+
+      request.body = body;
+
+      await super.create(request, response);
+    } catch (error) {
+      response.status(statusCode.BAD_REQUEST).json({ error });
+    }
+  }
+
   async update(req: Request, response: Response) {
     const request = req as AuthenticatedRequest;
 

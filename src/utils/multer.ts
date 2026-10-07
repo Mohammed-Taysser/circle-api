@@ -14,7 +14,7 @@ const FILE_LIMITS = {
 
 // Allowed MIME types
 const ALLOWED_MIME_TYPES = {
-  image: ['image/jpeg', 'image/png', 'image/webp'],
+  image: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'],
   video: ['video/mp4', 'video/mpeg', 'video/quicktime'],
   audio: ['audio/mpeg', 'audio/wav', 'audio/ogg'],
 };

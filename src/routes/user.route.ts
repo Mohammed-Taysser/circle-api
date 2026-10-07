@@ -10,10 +10,19 @@ const router = express.Router();
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
 router.patch(
-  '/reset-password',
+  '/:id/reset-password',
   authorization,
   zodValidation(validation.resetPassword),
   controller.resetPassword
+);
+router.post(
+  '/',
+  authorization,
+  createMulterUpload('image').fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 },
+  ]),
+  controller.create
 );
 router.patch(
   '/:id',

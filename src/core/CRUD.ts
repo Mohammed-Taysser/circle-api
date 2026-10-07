@@ -12,7 +12,7 @@ interface CRUDOptions<T> {
 
 class CrudService<T extends MongoDocument> {
   protected model: Model<T>;
-  protected simpleFields: (keyof T)[] = ['_id'];
+  protected simpleFields: (keyof T)[] = [];
   protected whitelistFields: (keyof T)[] = [];
   protected paramsId = 'id';
 
@@ -44,21 +44,36 @@ class CrudService<T extends MongoDocument> {
 
     const filters = request.filters;
 
-    const pagination = calculatePagination(request);
+    if (request.query.simple === 'true') {
+      const items = await this.model.aggregate([
+        { $match: filters || {} },
+        {
+          $project: {
+            _id: 1,
+            name: {
+              $concat: this.simpleFields.map((field, index) => ({
+                $cond: {
+                  if: { $eq: [index, 0] },
+                  then: { $toString: `$${String(field)}` },
+                  else: {
+                    $concat: [' ', { $toString: `$${String(field)}` }],
+                  },
+                },
+              })),
+            },
+          },
+        },
+      ]);
 
-    const isSimple = request.query.simple === 'true';
+      return response.status(statusCode.OK).json({ data: items });
+    }
+
+    const pagination = calculatePagination(request);
 
     const total = await this.model.countDocuments(filters);
 
-    const projection = isSimple
-      ? this.simpleFields.reduce(
-          (prev, current) => ({ ...prev, [current]: 1, _id: 1 }),
-          {}
-        )
-      : {};
-
     await this.model
-      .find(filters, projection)
+      .find(filters)
       .skip(pagination.skip)
       .limit(pagination.limit)
       .then((items) => {

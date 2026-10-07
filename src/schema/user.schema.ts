@@ -106,6 +106,24 @@ userSchema.pre('save', async function () {
   }
 });
 
+userSchema.pre('findOneAndUpdate', async function (next) {
+  const update = this.getUpdate() as Partial<User>;
+  if (update.password) {
+    update.password = await hashPassword(update.password);
+    update.passwordChangeAt = new Date();
+  }
+  next();
+});
+
+userSchema.pre('updateOne', async function (next) {
+  const update = this.getUpdate() as Partial<User>;
+  if (update.password) {
+    update.password = await hashPassword(update.password);
+    update.passwordChangeAt = new Date();
+  }
+  next();
+});
+
 // userSchema.pre(/^find/, function (next) {
 //   this.find({ isDeleted: { $ne: false } });
 

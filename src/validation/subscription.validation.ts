@@ -20,6 +20,6 @@ const emailSubscriptionVerifySchema = z.object({
 });
 
 export default {
-  subscription: subscriptionSchema,
+  subscription: z.object({ body: subscriptionSchema }),
   emailSubscriptionVerify: emailSubscriptionVerifySchema,
 };

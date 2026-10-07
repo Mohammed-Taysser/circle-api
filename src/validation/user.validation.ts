@@ -56,7 +56,9 @@ export const updateUserSchema = z.object({
 
 // Schema for resetting password
 export const resetPasswordSchema = z.object({
-  email: z.string().trim().email('Invalid email address!'),
+  body: z.object({
+    password: z.string().min(8, 'Minimum 8 characters required!'),
+  }),
 });
 
 export default {

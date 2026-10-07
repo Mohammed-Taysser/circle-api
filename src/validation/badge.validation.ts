@@ -2,7 +2,7 @@ import z from 'zod';
 
 // Base schema for badge validation
 const badgeBaseSchema = z.object({
-  body: z.string().min(1, 'Body is required'),
+  body: z.string().min(10, 'Body must be at least 10 characters!'),
   label: z.string().min(1, 'Label is required'),
 });
 
